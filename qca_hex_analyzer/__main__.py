@@ -122,8 +122,16 @@ def main():
                     hexdata = hf.get_hex()
                     if analyzer.parse_hexdata(hexdata):
                         wmi_msg_id = analyzer.get_wmi_id()
+                        (wmi_cmd_id, wmi_evt_id) = analyzer.get_wmi_id_enums()
                         wmi_msg_data = analyzer.get_wmi_data_str()
-                        outfp.write("WMI msg id: %x\n" % (wmi_msg_id))
+                        str = 'WMI msg id: {:6x}'.format(wmi_msg_id)
+                        if wmi_cmd_id:
+                            str = '{}  cmd: {}'.format(str, wmi_cmd_id.name)
+                            str = str.ljust(70)
+                        if wmi_evt_id:
+                            str = '{}  evt: {}'.format(str, wmi_evt_id.name)
+                        str = '{}\n'.format(str)
+                        outfp.write(str)
                         if parsed_args.print_data:
                             outfp.write("WMI msg data: %s\n" % (wmi_msg_data))
 

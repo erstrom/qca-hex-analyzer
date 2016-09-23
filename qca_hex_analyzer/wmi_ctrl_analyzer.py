@@ -1,4 +1,6 @@
 from collections import namedtuple
+from .wmi_unified import WmiUnified, WmiUnifiedCmd, WmiUnifiedCmdGrpId
+
 
 HtcHeader = namedtuple('HtcHeader',
                        ['eid', 'flags', 'length', 'ctrl0', 'ctrl1'],
@@ -31,6 +33,8 @@ class WmiCtrlAnalyzer:
         self.full_wmi_msg = False
         self.htc_hdr = None
         self.wmi_hdr = None
+        self.wmi_cmd_enum = None
+        self.wmi_evt_enum = None
 
     def __create_htc_hdr(self, hexdata):
 
@@ -95,6 +99,14 @@ class WmiCtrlAnalyzer:
 
         self.htc_hdr = htc_hdr
         self.wmi_hdr = wmi_hdr
+        if self.wmi_unified:
+            self.wmi_cmd_enum = WmiUnified.get_cmd_enum(self.wmi_hdr.msg_id)
+            self.wmi_evt_enum = WmiUnified.get_evt_enum(self.wmi_hdr.msg_id)
+            if not self.wmi_cmd_enum and not self.wmi_evt_enum:
+                # The id was not a valid command or event id, so this can't be
+                # a valid WMI header
+                return False
+
         # Append the last bytes (4 bytes in the case of wmi unified)
         # to the saved wmi data array
         self.cur_wmi_data = hexdata_a[self.htc_hdr_len + self.wmi_hdr_len:16]
@@ -142,6 +154,17 @@ class WmiCtrlAnalyzer:
             return None
 
         return self.wmi_hdr.msg_id
+
+    def get_wmi_id_enums(self):
+
+        return (self.wmi_cmd_enum, self.wmi_evt_enum)
+
+    def get_wmi_id_grp(self):
+
+        if not self.wmi_hdr:
+            return None
+
+        return WmiUnified.get_cmd_group(self.wmi_hdr.msg_id)
 
     def get_wmi_data(self):
 
