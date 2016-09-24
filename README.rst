@@ -18,8 +18,8 @@ data (for ath6kl this means a proper debug mask).
 Installing
 ----------
 
-Installing dependencies (hexfilter)
-###################################
+Installing dependency: hexfilter
+################################
 
 qca-hex-analyzer is depending on another tool/library called hexfilter.
 hexfilter is used to filter out the actual hex dumps from the logs.
@@ -51,6 +51,27 @@ On Debian/Ubuntu the easiest way to install it is:
 .. code-block:: bash
 
     $ sudo apt-get install python-virtualenv
+
+Installing dependency: enum34
+#############################
+
+In case a Python version prior to 3.4 is used, the package enum34 must
+be installed. This is a backport of the enum package that comes with
+Python 3.4
+
+Below shows how to install enum34:
+
+.. code-block:: bash
+
+    $ pip install enum34
+
+The above installation requires the python package python-pip.
+On Debian/Ubuntu the easiest way to install it is:
+
+.. code-block:: bash
+
+    $ sudo apt-get install python-pip
+
 
 Installing qca-hex-analyzer
 ###########################
