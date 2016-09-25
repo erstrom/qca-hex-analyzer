@@ -14,7 +14,7 @@ description = \
     "The hexdumps are assumed to contain dumps of the traffic " \
     "between the driver and the target. " \
     "No special preprocessing of the log files is required. " \
-    "Filter strings can be used to limit the output " \
+    "Filter strings (description strings) can be used to limit the output " \
     "(only RX or TX etc.). " \
     "The driver must of course be configured to log all necessary debug " \
     "data (for ath6kl this means a proper debug mask). "
@@ -27,7 +27,13 @@ wmi_ctrl_description = \
     "Extracts WMI control message hexdata from an input (--input-file). " \
     "The extracted messages will be printed to the output (--output -file). " \
     "--ep-id is used to determine from which HTC endpoint the data will " \
-    "be extracted (see description of that option below). "
+    "be extracted (see description of that option below). " \
+    "All valid WMI control message ID's will be printed together with the " \
+    "message enum string (from ath6kl source code). " \
+    "The --wmi-unified option must be used if the driver uses the WMI " \
+    "unified protocol. " \
+    "The WMI control message payload will also be printed together with " \
+    "message ID's if the --print-data option is used."
 
 
 def load_options():
@@ -46,16 +52,21 @@ def load_options():
                                   "contains time stamps. ")
     base_parser.add_argument('-d', '--desc-str', nargs='+', type=str,
                              help="Description string(s) of the dumps. "
-                                  "Only dumps containing a description string "
+                                  "Only dumps with a prefix "
                                   "matching any of the provided desc strings "
                                   "will be analyzed. "
-                                  "If no --desc-str option is given, no description "
-                                  "filtering will be performed.")
+                                  "If no --desc-str option is given, no "
+                                  "description filtering will be performed. "
+                                  "The prefix of a hexdump is the short "
+                                  "description string before the address "
+                                  "in each line of the dump. "
+                                  "--desc-str is normally used to select "
+                                  "between RX and TX logs. ")
     base_parser.add_argument('-v', '--desc-str-invert', nargs='+', type=str,
                              help="Description string(s) of the dumps to be. "
                                   "excluded. Similar to --desc-str, but all "
-                                  "matching descriptions will be excluded from the "
-                                  "analysis.")
+                                  "matching prefixes will be excluded from "
+                                  "the analysis.")
     base_parser.add_argument('-s', '--short-htc-header', action="store_true",
                              help="Use 6 byte HTC header (\"old\" format) "
                                   "instead of 8 bytes.")
