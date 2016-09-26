@@ -49,7 +49,7 @@ def load_options():
                                   "the output will be written to stdout.")
     base_parser.add_argument('-n', '--no-timestamps', action="store_true",
                              help="Specifies whether or not the input file "
-                                  "contains time stamps. ")
+                                  "contains timestamps. ")
     base_parser.add_argument('-d', '--desc-str', nargs='+', type=str,
                              help="Description string(s) of the dumps. "
                                   "Only dumps with a prefix "
@@ -70,6 +70,11 @@ def load_options():
     base_parser.add_argument('-s', '--short-htc-header', action="store_true",
                              help="Use 6 byte HTC header (\"old\" format) "
                                   "instead of 8 bytes.")
+    base_parser.add_argument('-t', '--keep-timestamps', action="store_true",
+                             help="Keep the timestamps associated with each "
+                                  "hexdump in the output. "
+                                  "This option will only have effect if the "
+                                  "log file contains timestamps." )
 
     parser = argparse.ArgumentParser(prog="qca_hex_analyzer",
                                      description=description,
@@ -116,7 +121,8 @@ def main():
         else:
             outfp = sys.stdout
 
-        hf = hexfilter.HexFilterLinux(skip_timestamps=True,
+        hf = hexfilter.HexFilterLinux(skip_timestamps=(not parsed_args.keep_timestamps),
+                                      abs_timestamps=True,
                                       dump_desc=parsed_args.desc_str,
                                       dump_desc_invert=parsed_args.desc_str_invert,
                                       log_has_timestamps=(not parsed_args.no_timestamps),
@@ -126,7 +132,8 @@ def main():
         if parsed_args.subparser_name == 'wmi-ctrl':
             analyzer = WmiCtrlAnalyzer(ctrl_svc_eid=parsed_args.ep_id[0],
                                        wmi_unified=parsed_args.wmi_unified,
-                                       short_htc_hdr=parsed_args.short_htc_header)
+                                       short_htc_hdr=parsed_args.short_htc_header,
+                                       timestamps=parsed_args.keep_timestamps)
 
             for line in infp:
                 if hf.parse_line(line):
@@ -135,7 +142,12 @@ def main():
                         wmi_msg_id = analyzer.get_wmi_id()
                         (wmi_cmd_id, wmi_evt_id) = analyzer.get_wmi_id_enums()
                         wmi_msg_data = analyzer.get_wmi_data_str()
-                        str = 'WMI msg id: {:6x}'.format(wmi_msg_id)
+                        ts = analyzer.get_wmi_timestamp()
+                        str = ''
+                        if ts:
+                            str = '[{}]'.format(ts)
+                            str = str.ljust(16)
+                        str = '{}WMI msg id: {:6x}'.format(str, wmi_msg_id)
                         if wmi_cmd_id:
                             str = '{}  cmd: {}'.format(str, wmi_cmd_id.name)
                             str = str.ljust(70)

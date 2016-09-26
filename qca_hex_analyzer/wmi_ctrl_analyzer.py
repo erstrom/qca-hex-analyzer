@@ -13,10 +13,12 @@ WmiHeader = namedtuple('WmiHeader',
 
 class WmiCtrlAnalyzer:
 
-    def __init__(self, ctrl_svc_eid=1, short_htc_hdr=False, wmi_unified=True):
+    def __init__(self, ctrl_svc_eid=1, short_htc_hdr=False, wmi_unified=True,
+                 timestamps=False):
 
         self.ctrl_svc_eid = ctrl_svc_eid
         self.wmi_unified = wmi_unified
+        self.timestamps = timestamps
 
         if short_htc_hdr:
             self.htc_hdr_len = 6
@@ -140,13 +142,21 @@ class WmiCtrlAnalyzer:
 
     def parse_hexdata(self, hexdata):
 
-        # Read the dump address. Address = 0 means a new msg
-        hexdata_split1 = hexdata.split(': ', 1)
-        addr = int(hexdata_split1[0], 16)
-        if addr == 0:
-            return self.__begin_new_frame(hexdata_split1[1])
+        if self.timestamps:
+            hexdata_split1 = hexdata.split('] ', 1)
+            ts = hexdata_split1[0][1:]
         else:
-            return self.__continue_frame(hexdata_split1[1])
+            hexdata_split1 = [None, hexdata]
+            ts = None
+
+        # Read the dump address. Address = 0 means a new msg
+        hexdata_split2 = hexdata_split1[1].split(': ', 1)
+        addr = int(hexdata_split2[0], 16)
+        if addr == 0:
+            self.ts = ts
+            return self.__begin_new_frame(hexdata_split2[1])
+        else:
+            return self.__continue_frame(hexdata_split2[1])
 
     def get_wmi_id(self):
 
@@ -158,6 +168,13 @@ class WmiCtrlAnalyzer:
     def get_wmi_id_enums(self):
 
         return (self.wmi_cmd_enum, self.wmi_evt_enum)
+
+    def get_wmi_timestamp(self):
+
+        if self.timestamps:
+            return self.ts
+        else:
+            return None
 
     def get_wmi_id_grp(self):
 
