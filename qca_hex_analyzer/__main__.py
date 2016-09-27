@@ -5,7 +5,7 @@ import pdb
 import traceback
 import sys
 import os
-from qca_hex_analyzer import WmiCtrlAnalyzer
+from qca_hex_analyzer import WmiCtrlAnalyzer, HttAnalyzer
 import hexfilter
 
 description = \
@@ -33,6 +33,20 @@ wmi_ctrl_description = \
     "The --wmi-unified option must be used if the driver uses the WMI " \
     "unified protocol. " \
     "The WMI control message payload will also be printed together with " \
+    "message ID's if the --print-data option is used."
+
+htt_help = \
+    "Subcommand for HTT message parsing. " \
+    "This subcommand is used to extract HTT messages from the input. "
+
+htt_description = \
+    "Extracts HTT message hexdata from an input (--input-file). " \
+    "The extracted messages will be printed to the output (--output -file). " \
+    "--ep-id is used to determine from which HTC endpoint the data will " \
+    "be extracted (see description of that option below). " \
+    "All valid HTT message ID's will be printed together with the " \
+    "message enum string (from ath6kl source code). " \
+    "The message payload will also be printed together with " \
     "message ID's if the --print-data option is used."
 
 
@@ -104,6 +118,24 @@ def load_options():
                                       "target in the HTC service connect response). "
                                       "If this option is omitted a default value of 1 "
                                       "will be used.")
+    parser_htt = subparsers.add_parser('htt',
+                                       help=htt_help,
+                                       description=htt_description,
+                                       parents=[base_parser])
+    parser_htt.add_argument('-p', '--print-data', action="store_true",
+                            help="Print HTT data message payload (and not just "
+                                 "HTT message ID) for all encountered messages. ")
+    parser_htt.add_argument('-e', '--ep-id', metavar='ID', nargs=1,
+                            type=int, default=[2],
+                            help="HTT service endpoint ID. "
+                                 "This is the endpoint where the HTT data is "
+                                 "expected to be present. Make sure the endpoint "
+                                 "matches the endpoint id associated with the "
+                                 "HTT endpoint (service id 0x300) "
+                                 "of the driver (the endpoint received from the "
+                                 "target in the HTC service connect response). "
+                                 "If this option is omitted a default value of 2 "
+                                 "will be used.")
     parsed_args = parser.parse_args()
 
 
@@ -157,6 +189,34 @@ def main():
                         outfp.write(str)
                         if parsed_args.print_data:
                             outfp.write("WMI msg data: %s\n" % (wmi_msg_data))
+
+        if parsed_args.subparser_name == 'htt':
+            analyzer = HttAnalyzer(eid=parsed_args.ep_id[0],
+                                   short_htc_hdr=parsed_args.short_htc_header,
+                                   timestamps=parsed_args.keep_timestamps)
+
+            for line in infp:
+                if hf.parse_line(line):
+                    hexdata = hf.get_hex()
+                    if analyzer.parse_hexdata(hexdata):
+                        msg_id = analyzer.get_id()
+                        (h2t_id, t2h_id) = analyzer.get_enums()
+                        msg_data = analyzer.get_data_str()
+                        ts = analyzer.get_timestamp()
+                        str = ''
+                        if ts:
+                            str = '[{}]'.format(ts)
+                            str = str.ljust(16)
+                        str = '{}HTT msg id: {:6x}'.format(str, msg_id)
+                        if h2t_id:
+                            str = '{}  h2t: {}'.format(str, h2t_id.name)
+                            str = str.ljust(70)
+                        if t2h_id:
+                            str = '{}  t2h: {}'.format(str, t2h_id.name)
+                        str = '{}\n'.format(str)
+                        outfp.write(str)
+                        if parsed_args.print_data:
+                            outfp.write("HTT msg data: %s\n" % (msg_data))
 
     except IOError as err:
         sys.stderr.write('{}\n'.format(err))
