@@ -5,7 +5,7 @@ import pdb
 import traceback
 import sys
 import os
-from qca_hex_analyzer import WmiCtrlAnalyzer, HttAnalyzer
+from qca_hex_analyzer import WmiCtrlAnalyzer, HttAnalyzer, AllAnalyzer
 import hexfilter
 
 description = \
@@ -46,6 +46,24 @@ htt_description = \
     "be extracted (see description of that option below). " \
     "All valid HTT message ID's will be printed together with the " \
     "message enum string (from ath6kl source code). " \
+    "The message payload will also be printed together with " \
+    "message ID's if the --print-data option is used."
+
+all_help = \
+    "Subcommand for parsing of all supported message types. " \
+    "This subcommand is used to extract both WMI control and " \
+    "HTT messages from the input. "
+
+all_description = \
+    "Extracts message hexdata from an input (--input-file). " \
+    "The extracted messages will be printed to the output (--output-file). " \
+    "The messages can be any of the supported message types " \
+    "(currently only WMI control and HTT). " \
+    "--wmi-ctrl-ep-id and --htt-ep-id is used to determine from which " \
+    "endpoints WMI and HTT data will be extracted " \
+    "(see description of those options below). " \
+    "All valid WMI control and HTT message ID's will be printed together " \
+    "with a corresponding message enum string. " \
     "The message payload will also be printed together with " \
     "message ID's if the --print-data option is used."
 
@@ -136,6 +154,40 @@ def load_options():
                                  "target in the HTC service connect response). "
                                  "If this option is omitted a default value of 2 "
                                  "will be used.")
+    parser_all = subparsers.add_parser('all',
+                                       help=all_help,
+                                       description=all_description,
+                                       parents=[base_parser])
+    parser_all.add_argument('-p', '--print-data', action="store_true",
+                            help="Print message payload (and not just "
+                                 "message ID) for all encountered messages. ")
+    parser_all.add_argument('-u', '--wmi-unified', action="store_true",
+                            help="Specifies whether or not the WMI messages "
+                                 "are according to the WMI unified protocol. "
+                                 "If not set, the messages will be interpreted "
+                                 "according to the \"old\" format")
+    parser_all.add_argument('--htt-ep-id', metavar='ID', nargs=1,
+                            type=int, default=[2],
+                            help="HTT service endpoint ID. "
+                                 "This is the endpoint where the HTT data is "
+                                 "expected to be present. Make sure the endpoint "
+                                 "matches the endpoint id associated with the "
+                                 "HTT endpoint (service id 0x300) "
+                                 "of the driver (the endpoint received from the "
+                                 "target in the HTC service connect response). "
+                                 "If this option is omitted a default value of 2 "
+                                 "will be used.")
+    parser_all.add_argument('--wmi-ctrl-ep-id', metavar='ID', nargs=1,
+                            type=int, default=[1],
+                            help="WMI control service endpoint ID. "
+                                 "This is the endpoint where the WMI control data is "
+                                 "expected to be present. Make sure the endpoint "
+                                 "matches the endpoint id associated with the "
+                                 "control service endpoint (service id 0x100) "
+                                 "of the driver (the endpoint received from the "
+                                 "target in the HTC service connect response). "
+                                 "If this option is omitted a default value of 1 "
+                                 "will be used.")
     parsed_args = parser.parse_args()
 
 
@@ -168,6 +220,12 @@ def main():
                                        timestamps=parsed_args.keep_timestamps)
         elif parsed_args.subparser_name == 'htt':
             analyzer = HttAnalyzer(eid=parsed_args.ep_id[0],
+                                   short_htc_hdr=parsed_args.short_htc_header,
+                                   timestamps=parsed_args.keep_timestamps)
+        elif parsed_args.subparser_name == 'all':
+            analyzer = AllAnalyzer(wmi_ctrl_eid=parsed_args.wmi_ctrl_ep_id[0],
+                                   htt_eid=parsed_args.htt_ep_id[0],
+                                   wmi_unified=parsed_args.wmi_unified,
                                    short_htc_hdr=parsed_args.short_htc_header,
                                    timestamps=parsed_args.keep_timestamps)
         else:

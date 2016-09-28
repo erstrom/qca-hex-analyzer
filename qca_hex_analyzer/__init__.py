@@ -2,6 +2,7 @@ from .analyzer import Analyzer
 from .analyzer import HtcHeader
 from .wmi_ctrl_analyzer import WmiCtrlAnalyzer
 from .htt_analyzer import HttAnalyzer
+from .all_analyzer import AllAnalyzer
 from .wmi_unified import WmiUnified
 from .wmi_unified import WmiUnifiedCmd
 from .wmi_unified import WmiUnifiedEvt
