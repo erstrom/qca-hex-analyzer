@@ -162,61 +162,26 @@ def main():
                                       remove_ascii_part=True)
 
         if parsed_args.subparser_name == 'wmi-ctrl':
-            analyzer = WmiCtrlAnalyzer(ctrl_svc_eid=parsed_args.ep_id[0],
+            analyzer = WmiCtrlAnalyzer(eid=parsed_args.ep_id[0],
                                        wmi_unified=parsed_args.wmi_unified,
                                        short_htc_hdr=parsed_args.short_htc_header,
                                        timestamps=parsed_args.keep_timestamps)
-
-            for line in infp:
-                if hf.parse_line(line):
-                    hexdata = hf.get_hex()
-                    if analyzer.parse_hexdata(hexdata):
-                        wmi_msg_id = analyzer.get_wmi_id()
-                        (wmi_cmd_id, wmi_evt_id) = analyzer.get_wmi_id_enums()
-                        wmi_msg_data = analyzer.get_wmi_data_str()
-                        ts = analyzer.get_wmi_timestamp()
-                        str = ''
-                        if ts:
-                            str = '[{}]'.format(ts)
-                            str = str.ljust(16)
-                        str = '{}WMI msg id: {:6x}'.format(str, wmi_msg_id)
-                        if wmi_cmd_id:
-                            str = '{}  cmd: {}'.format(str, wmi_cmd_id.name)
-                            str = str.ljust(70)
-                        if wmi_evt_id:
-                            str = '{}  evt: {}'.format(str, wmi_evt_id.name)
-                        str = '{}\n'.format(str)
-                        outfp.write(str)
-                        if parsed_args.print_data:
-                            outfp.write("WMI msg data: %s\n" % (wmi_msg_data))
-
-        if parsed_args.subparser_name == 'htt':
+        elif parsed_args.subparser_name == 'htt':
             analyzer = HttAnalyzer(eid=parsed_args.ep_id[0],
                                    short_htc_hdr=parsed_args.short_htc_header,
                                    timestamps=parsed_args.keep_timestamps)
+        else:
+            sys.stderr.write('Unsupported subcommand: {}\n'.format(parsed_args.subparser_name))
 
-            for line in infp:
-                if hf.parse_line(line):
-                    hexdata = hf.get_hex()
-                    if analyzer.parse_hexdata(hexdata):
-                        msg_id = analyzer.get_id()
-                        (h2t_id, t2h_id) = analyzer.get_enums()
+        for line in infp:
+            if hf.parse_line(line):
+                hexdata = hf.get_hex()
+                if analyzer.parse_hexdata(hexdata):
+                    str = analyzer.get_id_str()
+                    outfp.write(str)
+                    if parsed_args.print_data:
                         msg_data = analyzer.get_data_str()
-                        ts = analyzer.get_timestamp()
-                        str = ''
-                        if ts:
-                            str = '[{}]'.format(ts)
-                            str = str.ljust(16)
-                        str = '{}HTT msg id: {:6x}'.format(str, msg_id)
-                        if h2t_id:
-                            str = '{}  h2t: {}'.format(str, h2t_id.name)
-                            str = str.ljust(70)
-                        if t2h_id:
-                            str = '{}  t2h: {}'.format(str, t2h_id.name)
-                        str = '{}\n'.format(str)
-                        outfp.write(str)
-                        if parsed_args.print_data:
-                            outfp.write("HTT msg data: %s\n" % (msg_data))
+                        outfp.write("msg data: %s\n" % (msg_data))
 
     except IOError as err:
         sys.stderr.write('{}\n'.format(err))

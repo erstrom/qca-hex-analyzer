@@ -1,3 +1,5 @@
+from .analyzer import Analyzer
+from .analyzer import HtcHeader
 from .wmi_ctrl_analyzer import WmiCtrlAnalyzer
 from .htt_analyzer import HttAnalyzer
 from .wmi_unified import WmiUnified
