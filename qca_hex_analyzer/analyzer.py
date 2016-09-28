@@ -45,6 +45,25 @@ class Analyzer:
                         ctrl1=ctrl1)
         return hdr
 
+    def append_msg_data(self, hexdata_a):
+
+        if len(self.cur_data) + len(hexdata_a) >= self.htc_hdr.length:
+            # The data must not exceed the HTC hdr length.
+            # The HTC header length is the length of the payload
+            # Since there will be padding of the SDIO messages it
+            # is not unlikely that there will be exceeding bytes.
+            exceeding_bytes = \
+                len(self.cur_data) + len(hexdata_a) - self.htc_hdr.length
+            remaining_bytes = len(hexdata_a) - exceeding_bytes
+            self.cur_data += hexdata_a[0:remaining_bytes]
+            # We now have a full WMI message
+            self.full_msg = True
+            return True
+
+        self.cur_data += hexdata_a
+        # Not a full message, more data needed...
+        return False
+
     def parse_timestamp(self, hexdata):
 
         if self.timestamps:

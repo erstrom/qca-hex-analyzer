@@ -85,9 +85,8 @@ class WmiCtrlAnalyzer(Analyzer):
 
         # Append the last bytes (4 bytes in the case of wmi unified)
         # to the saved wmi data array
-        self.cur_data = hexdata_a[self.htc_hdr_len + self.wmi_hdr_len:16]
         self.valid_msg = True
-        return False
+        return self.append_msg_data(hexdata_a[self.htc_hdr_len + self.wmi_hdr_len:16])
 
     def __continue_frame(self, hexdata):
 
@@ -96,23 +95,7 @@ class WmiCtrlAnalyzer(Analyzer):
 
         hexdata_a = hexdata.split(' ', 15)
 
-        if len(self.cur_data) + len(hexdata_a) >= self.htc_hdr.length:
-            # The wmi data must not exceed the HTC hdr length.
-            # The HTC header length is the length of the payload
-            # (wmi data in this case).
-            # Since there will be padding of the SDIO messages it
-            # is not unlikely that there will be exceeding bytes (padding).
-            exceeding_bytes = \
-                len(self.cur_data) + len(hexdata_a) - self.htc_hdr.length
-            remaining_bytes = len(hexdata_a) - exceeding_bytes
-            self.cur_data += hexdata_a[0:remaining_bytes]
-            # We now have a full WMI message
-            self.full_msg = True
-            return True
-
-        self.cur_data += hexdata_a
-        # Not a full wmi message, more data needed...
-        return False
+        return self.append_msg_data(hexdata_a)
 
     def parse_hexdata(self, hexdata):
 
