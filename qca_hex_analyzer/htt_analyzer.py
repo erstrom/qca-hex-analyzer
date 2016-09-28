@@ -93,7 +93,7 @@ class HttAnalyzer(Analyzer):
 
     def get_id_str(self):
 
-        if not self.htt_id:
+        if self.htt_id is None:
             return ''
 
         str = ''
