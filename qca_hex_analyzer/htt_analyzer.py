@@ -19,7 +19,7 @@ class HttAnalyzer(Analyzer):
     def __begin_new_frame(self, hexdata):
 
         # Verify that the hexdump has enough data for the HTC hdr
-        # and WMI hdr.
+        # and a HTT message id.
         # A linux hexdump has 16 values = 15 spaces in one line at most
         hexdata_a = hexdata.split(' ', 15)
 
