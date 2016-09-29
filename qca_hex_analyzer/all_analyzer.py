@@ -27,13 +27,6 @@ class AllAnalyzer(Analyzer):
         self.wmi_ctrl_eid = wmi_ctrl_eid
         self.htt_eid = htt_eid
 
-        self.wmi_hdr = None
-        self.wmi_cmd_enum = None
-        self.wmi_evt_enum = None
-        self.h2t_enum = None
-        self.t2h_enum = None
-        self.htt_id = None
-
     def __set_cur_analyzer(self, hexdata):
 
         hexdata_a = hexdata.split(' ', 15)
