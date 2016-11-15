@@ -106,7 +106,7 @@ def load_options():
                              help="Keep the timestamps associated with each "
                                   "hexdump in the output. "
                                   "This option will only have effect if the "
-                                  "log file contains timestamps." )
+                                  "log file contains timestamps.")
 
     parser = argparse.ArgumentParser(prog="qca_hex_analyzer",
                                      description=description,
