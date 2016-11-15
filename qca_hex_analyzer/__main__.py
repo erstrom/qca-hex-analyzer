@@ -10,14 +10,14 @@ import hexfilter
 
 description = \
     "Tool used to analyze hexdumps produced by a qca wireless kernel " \
-    "driver (such as ath6kl or qcacld2.0). " \
+    "driver (such as ath6kl, ath10k or qcacld2.0). " \
     "The hexdumps are assumed to contain dumps of the traffic " \
     "between the driver and the target. " \
     "No special preprocessing of the log files is required. " \
     "Filter strings (description strings) can be used to limit the output " \
     "(only RX or TX etc.). " \
     "The driver must of course be configured to log all necessary debug " \
-    "data (for ath6kl this means a proper debug mask). "
+    "data (for ath6kl and ath10k this means a proper debug mask). "
 
 wmi_ctrl_help = \
     "Subcommand for WMI control message parsing. " \
@@ -30,8 +30,8 @@ wmi_ctrl_description = \
     "be extracted (see description of that option below). " \
     "All valid WMI control message ID's will be printed together with the " \
     "message enum string (from ath6kl source code). " \
-    "The --wmi-unified option must be used if the driver uses the WMI " \
-    "unified protocol. " \
+    "The --wmi-old option must be used if the driver does not use the WMI " \
+    "unified protocol (ath6kl). " \
     "The WMI control message payload will also be printed together with " \
     "message ID's if the --print-data option is used."
 
@@ -45,7 +45,7 @@ htt_description = \
     "--ep-id is used to determine from which HTC endpoint the data will " \
     "be extracted (see description of that option below). " \
     "All valid HTT message ID's will be printed together with the " \
-    "message enum string (from ath6kl source code). " \
+    "message enum string (from ath10k source code). " \
     "The message payload will also be printed together with " \
     "message ID's if the --print-data option is used."
 
@@ -117,11 +117,11 @@ def load_options():
                                             help=wmi_ctrl_help,
                                             description=wmi_ctrl_description,
                                             parents=[base_parser])
-    parser_wmi_ctrl.add_argument('-u', '--wmi-unified', action="store_true",
+    parser_wmi_ctrl.add_argument('--wmi-old', action="store_true",
                                  help="Specifies whether or not the WMI messages "
-                                      "are according to the WMI unified protocol. "
+                                      "are according to the \"old\" WMI protocol. "
                                       "If not set, the messages will be interpreted "
-                                      "according to the \"old\" format")
+                                      "according to the unified WMI format")
     parser_wmi_ctrl.add_argument('-p', '--print-data', action="store_true",
                                  help="Print WMI data message payload (and not just "
                                       "WMI message ID) for all encountered messages. ")
@@ -161,11 +161,11 @@ def load_options():
     parser_all.add_argument('-p', '--print-data', action="store_true",
                             help="Print message payload (and not just "
                                  "message ID) for all encountered messages. ")
-    parser_all.add_argument('-u', '--wmi-unified', action="store_true",
+    parser_all.add_argument('--wmi-old', action="store_true",
                             help="Specifies whether or not the WMI messages "
-                                 "are according to the WMI unified protocol. "
+                                 "are according to the \"old\" WMI protocol. "
                                  "If not set, the messages will be interpreted "
-                                 "according to the \"old\" format")
+                                 "according to the unified WMI format")
     parser_all.add_argument('--htt-ep-id', metavar='ID', nargs=1,
                             type=int, default=[2],
                             help="HTT service endpoint ID. "
@@ -215,7 +215,7 @@ def main():
 
         if parsed_args.subparser_name == 'wmi-ctrl':
             analyzer = WmiCtrlAnalyzer(eid=parsed_args.ep_id[0],
-                                       wmi_unified=parsed_args.wmi_unified,
+                                       wmi_unified=(not parsed_args.wmi_old),
                                        short_htc_hdr=parsed_args.short_htc_header,
                                        timestamps=parsed_args.keep_timestamps)
         elif parsed_args.subparser_name == 'htt':
@@ -225,7 +225,7 @@ def main():
         elif parsed_args.subparser_name == 'all':
             analyzer = AllAnalyzer(wmi_ctrl_eid=parsed_args.wmi_ctrl_ep_id[0],
                                    htt_eid=parsed_args.htt_ep_id[0],
-                                   wmi_unified=parsed_args.wmi_unified,
+                                   wmi_unified=(not parsed_args.wmi_old),
                                    short_htc_hdr=parsed_args.short_htc_header,
                                    timestamps=parsed_args.keep_timestamps)
         else:
