@@ -126,7 +126,7 @@ def load_options():
                                  help="Print WMI data message payload (and not just "
                                       "WMI message ID) for all encountered messages. ")
     parser_wmi_ctrl.add_argument('-e', '--ep-id', metavar='ID', nargs=1,
-                                 type=int, default=[1],
+                                 type=int, default=[2],
                                  help="WMI control service endpoint ID. "
                                       "This is the endpoint where the WMI control data is "
                                       "expected to be present. Make sure the endpoint "
@@ -134,7 +134,7 @@ def load_options():
                                       "control service endpoint (service id 0x100) "
                                       "of the driver (the endpoint received from the "
                                       "target in the HTC service connect response). "
-                                      "If this option is omitted a default value of 1 "
+                                      "If this option is omitted a default value of 2 "
                                       "will be used.")
     parser_htt = subparsers.add_parser('htt',
                                        help=htt_help,
@@ -144,7 +144,7 @@ def load_options():
                             help="Print HTT data message payload (and not just "
                                  "HTT message ID) for all encountered messages. ")
     parser_htt.add_argument('-e', '--ep-id', metavar='ID', nargs=1,
-                            type=int, default=[2],
+                            type=int, default=[1],
                             help="HTT service endpoint ID. "
                                  "This is the endpoint where the HTT data is "
                                  "expected to be present. Make sure the endpoint "
@@ -152,7 +152,7 @@ def load_options():
                                  "HTT endpoint (service id 0x300) "
                                  "of the driver (the endpoint received from the "
                                  "target in the HTC service connect response). "
-                                 "If this option is omitted a default value of 2 "
+                                 "If this option is omitted a default value of 1 "
                                  "will be used.")
     parser_all = subparsers.add_parser('all',
                                        help=all_help,
@@ -167,7 +167,7 @@ def load_options():
                                  "If not set, the messages will be interpreted "
                                  "according to the unified WMI format")
     parser_all.add_argument('--htt-ep-id', metavar='ID', nargs=1,
-                            type=int, default=[2],
+                            type=int, default=[1],
                             help="HTT service endpoint ID. "
                                  "This is the endpoint where the HTT data is "
                                  "expected to be present. Make sure the endpoint "
@@ -175,10 +175,10 @@ def load_options():
                                  "HTT endpoint (service id 0x300) "
                                  "of the driver (the endpoint received from the "
                                  "target in the HTC service connect response). "
-                                 "If this option is omitted a default value of 2 "
+                                 "If this option is omitted a default value of 1 "
                                  "will be used.")
     parser_all.add_argument('--wmi-ctrl-ep-id', metavar='ID', nargs=1,
-                            type=int, default=[1],
+                            type=int, default=[2],
                             help="WMI control service endpoint ID. "
                                  "This is the endpoint where the WMI control data is "
                                  "expected to be present. Make sure the endpoint "
@@ -186,7 +186,7 @@ def load_options():
                                  "control service endpoint (service id 0x100) "
                                  "of the driver (the endpoint received from the "
                                  "target in the HTC service connect response). "
-                                 "If this option is omitted a default value of 1 "
+                                 "If this option is omitted a default value of 2 "
                                  "will be used.")
     parsed_args = parser.parse_args()
 
