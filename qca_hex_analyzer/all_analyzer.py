@@ -1,6 +1,7 @@
 from collections import namedtuple
 from .analyzer import Analyzer, HtcHeader
 from .wmi_ctrl_analyzer import WmiCtrlAnalyzer
+from .htc_ctrl_analyzer import HtcCtrlAnalyzer
 from .htt_analyzer import HttAnalyzer
 
 
@@ -18,6 +19,9 @@ class AllAnalyzer(Analyzer):
                                                  wmi_unified=wmi_unified,
                                                  timestamps=timestamps)
 
+        self.htc_ctrl_analyzer = HtcCtrlAnalyzer(short_htc_hdr=short_htc_hdr,
+                                                 timestamps=timestamps)
+
         self.htt_analyzer = HttAnalyzer(eid=htt_eid,
                                         short_htc_hdr=short_htc_hdr,
                                         timestamps=timestamps)
@@ -26,6 +30,7 @@ class AllAnalyzer(Analyzer):
 
         self.wmi_ctrl_eid = wmi_ctrl_eid
         self.htt_eid = htt_eid
+        self.htc_ctrl_eid = 0
 
     def __set_cur_analyzer(self, hexdata):
 
@@ -35,6 +40,8 @@ class AllAnalyzer(Analyzer):
             self.cur_analyzer = self.wmi_ctrl_analyzer
         elif eid == self.htt_eid:
             self.cur_analyzer = self.htt_analyzer
+        elif eid == self.htc_ctrl_eid:
+            self.cur_analyzer = self.htc_ctrl_analyzer
         else:
             self.cur_analyzer = None
 

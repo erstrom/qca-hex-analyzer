@@ -5,7 +5,7 @@ import pdb
 import traceback
 import sys
 import os
-from qca_hex_analyzer import WmiCtrlAnalyzer, HttAnalyzer, AllAnalyzer
+from qca_hex_analyzer import WmiCtrlAnalyzer, HtcCtrlAnalyzer, HttAnalyzer, AllAnalyzer
 import hexfilter
 
 description = \
@@ -35,6 +35,19 @@ wmi_ctrl_description = \
     "The WMI control message payload will also be printed together with " \
     "message ID's if the --print-data option is used."
 
+htc_ctrl_help = \
+    "Subcommand for HTC control message parsing. " \
+    "This subcommand is used to extract HTC control messages from the input. "
+
+htc_ctrl_description = \
+    "Extracts HTC control message hexdata from an input (--input-file). " \
+    "The extracted messages will be printed to the output (--output -file). " \
+    "All valid HTC control message ID's will be printed together with the " \
+    "message enum string (from ath6kl source code). " \
+    "The message payload will also be printed together with the " \
+    "message ID's if the --print-data option is used. " \
+    "HTC control messages will always be extracted from endpoint 0."
+
 htt_help = \
     "Subcommand for HTT message parsing. " \
     "This subcommand is used to extract HTT messages from the input. "
@@ -51,18 +64,19 @@ htt_description = \
 
 all_help = \
     "Subcommand for parsing of all supported message types. " \
-    "This subcommand is used to extract both WMI control and " \
-    "HTT messages from the input. "
+    "This subcommand is used to extract both WMI control, " \
+    "HTC control and HTT messages from the input. "
 
 all_description = \
     "Extracts message hexdata from an input (--input-file). " \
     "The extracted messages will be printed to the output (--output-file). " \
     "The messages can be any of the supported message types " \
-    "(currently only WMI control and HTT). " \
+    "(currently only WMI controli, HTC control and HTT). " \
     "--wmi-ctrl-ep-id and --htt-ep-id is used to determine from which " \
     "endpoints WMI and HTT data will be extracted " \
     "(see description of those options below). " \
-    "All valid WMI control and HTT message ID's will be printed together " \
+    "HTC control messages will always be extracted from ep 0. " \
+    "All valid message ID's will be printed together " \
     "with a corresponding message enum string. " \
     "The message payload will also be printed together with " \
     "message ID's if the --print-data option is used."
@@ -136,6 +150,13 @@ def load_options():
                                       "target in the HTC service connect response). "
                                       "If this option is omitted a default value of 2 "
                                       "will be used.")
+    parser_wmi_ctrl = subparsers.add_parser('htc-ctrl',
+                                            help=htc_ctrl_help,
+                                            description=htc_ctrl_description,
+                                            parents=[base_parser])
+    parser_wmi_ctrl.add_argument('-p', '--print-data', action="store_true",
+                                 help="Print HTC ctrl data message payload (and not just "
+                                      "message ID) for all encountered messages. ")
     parser_htt = subparsers.add_parser('htt',
                                        help=htt_help,
                                        description=htt_description,
@@ -217,6 +238,9 @@ def main():
             analyzer = WmiCtrlAnalyzer(eid=parsed_args.ep_id[0],
                                        wmi_unified=(not parsed_args.wmi_old),
                                        short_htc_hdr=parsed_args.short_htc_header,
+                                       timestamps=parsed_args.keep_timestamps)
+        elif parsed_args.subparser_name == 'htc-ctrl':
+            analyzer = HtcCtrlAnalyzer(short_htc_hdr=parsed_args.short_htc_header,
                                        timestamps=parsed_args.keep_timestamps)
         elif parsed_args.subparser_name == 'htt':
             analyzer = HttAnalyzer(eid=parsed_args.ep_id[0],
