@@ -56,7 +56,7 @@ class Analyzer:
                 len(self.cur_data) + len(hexdata_a) - self.htc_hdr.length
             remaining_bytes = len(hexdata_a) - exceeding_bytes
             self.cur_data += hexdata_a[0:remaining_bytes]
-            # We now have a full WMI message
+            # We now have a full message
             self.full_msg = True
             return True
 
