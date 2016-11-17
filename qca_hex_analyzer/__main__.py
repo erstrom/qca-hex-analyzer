@@ -264,6 +264,8 @@ def main():
                     if parsed_args.print_data:
                         msg_data = analyzer.get_data_str()
                         outfp.write("msg data: %s\n" % (msg_data))
+                        msg_trailer = analyzer.get_trailer_str()
+                        outfp.write("msg trailer: %s\n" % (msg_trailer))
 
     except IOError as err:
         sys.stderr.write('{}\n'.format(err))

@@ -41,6 +41,7 @@ class HtcCtrlAnalyzer(Analyzer):
         hexdata_a = hexdata.split(' ', 15)
 
         self.cur_data = []
+        self.cur_trailer = []
         self.valid_msg = False
         self.full_msg = False
         htc_hdr = self.create_htc_hdr(hexdata_a)
@@ -50,17 +51,25 @@ class HtcCtrlAnalyzer(Analyzer):
         if htc_hdr.eid != self.eid:
             return False
 
+        self.htc_hdr = htc_hdr
+
+        # Examine the HTC header and check if it is a "trailer only"
+        # message. A "trailer only" message is a message with no data,
+        # just trailer.
+        data_len = self.get_data_len()
+        if data_len == 0:
+            return self.append_msg_data(hexdata_a[self.htc_hdr_len:16])
+
         htc_ctrl_hdr = self.__create_htc_ctrl_hdr(hexdata_a[self.htc_hdr_len:])
         if not htc_ctrl_hdr:
             return False
 
-        self.htc_hdr = htc_hdr
         self.htc_ctrl_hdr = htc_ctrl_hdr
         self.htc_ctrl_enum = HtcCtrl.get_msg_id_enum(self.htc_ctrl_hdr.msg_id)
 
         # Append the last bytes to the saved data array
         self.valid_msg = True
-        return self.append_msg_data(hexdata_a[self.htc_hdr_len + self.hdr_len:16])
+        return self.append_msg_data(hexdata_a[self.htc_hdr_len:16])
 
     def __continue_frame(self, hexdata):
 

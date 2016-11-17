@@ -26,6 +26,8 @@ class Analyzer:
         self.full_msg = False
         self.htc_hdr = None
         self.cur_data = []
+        self.cur_trailer = []
+        self.full_data = False
         self.ts = None
 
     def create_htc_hdr(self, hexdata):
@@ -45,22 +47,54 @@ class Analyzer:
                         ctrl1=ctrl1)
         return hdr
 
+    def get_data_len(self):
+
+        # Data length is defined as: total length - trailer length
+        return self.htc_hdr.length - self.htc_hdr.ctrl0
+
     def append_msg_data(self, hexdata_a):
 
-        if len(self.cur_data) + len(hexdata_a) >= self.htc_hdr.length:
-            # The data must not exceed the HTC hdr length.
-            # The HTC header length is the length of the payload
-            # Since there will be padding of the SDIO messages it
-            # is not unlikely that there will be exceeding bytes.
-            exceeding_bytes = \
-                len(self.cur_data) + len(hexdata_a) - self.htc_hdr.length
-            remaining_bytes = len(hexdata_a) - exceeding_bytes
-            self.cur_data += hexdata_a[0:remaining_bytes]
-            # We now have a full message
+        cur_data_len = self.get_data_len()
+        cur_trailer_len = self.htc_hdr.ctrl0
+        cur_tot_len = self.htc_hdr.length
+
+        bytes_left_full_data = cur_data_len - len(self.cur_data)
+        exceeding_data_bytes = len(hexdata_a) - bytes_left_full_data
+
+        if not self.full_data and exceeding_data_bytes >= 0:
+            self.full_data = True
+            self.cur_data += hexdata_a[0:bytes_left_full_data]
+            if cur_trailer_len == 0:
+                # We don't expect any trailer for this message so we
+                # consider it full
+                self.full_msg = True
+                self.full_data = False
+                return True
+            elif cur_trailer_len > exceeding_data_bytes:
+                self.cur_trailer += hexdata_a[bytes_left_full_data:]
+            else:
+                # Trailer is now full
+                end = bytes_left_full_data + \
+                      exceeding_data_bytes - cur_trailer_len
+                self.cur_trailer += hexdata_a[bytes_left_full_data:end]
+                self.full_msg = True
+                self.full_data = False
+                return True
+
+        bytes_left_full_trailer = cur_trailer_len - len(self.cur_trailer)
+        exceeding_trailer_bytes = len(hexdata_a) - bytes_left_full_trailer
+
+        if self.full_data and exceeding_trailer_bytes >= 0:
+            self.cur_trailer += hexdata_a[0:bytes_left_full_trailer]
             self.full_msg = True
+            self.full_data = False
             return True
 
-        self.cur_data += hexdata_a
+        if self.full_data:
+            self.cur_trailer += hexdata_a
+        else:
+            self.cur_data += hexdata_a
+
         # Not a full message, more data needed...
         return False
 
@@ -114,6 +148,26 @@ class Analyzer:
         str = '\n'
         no_of_lines = len(self.cur_data) // 16
         iter_a = self.cur_data
+        for i in range(0, no_of_lines + 1):
+            if len(iter_a) == 0:
+                break
+            str = '{0}{1:08x}:  '.format(str, i * 16)
+            iter_len = min(16, len(iter_a))
+            for j in range(0, iter_len):
+                str = '{0}{1} '.format(str, iter_a[j])
+            str = '{}\n'.format(str)
+            iter_a = iter_a[iter_len:]
+
+        return str
+
+    def get_trailer_str(self):
+
+        if not self.valid_msg:
+            return None
+
+        str = '\n'
+        no_of_lines = len(self.cur_trailer) // 16
+        iter_a = self.cur_trailer
         for i in range(0, no_of_lines + 1):
             if len(iter_a) == 0:
                 break

@@ -60,6 +60,7 @@ class WmiCtrlAnalyzer(Analyzer):
         hexdata_a = hexdata.split(' ', 15)
 
         self.cur_data = []
+        self.cur_trailer = []
         self.valid_msg = False
         self.full_msg = False
         htc_hdr = self.create_htc_hdr(hexdata_a)
@@ -86,7 +87,7 @@ class WmiCtrlAnalyzer(Analyzer):
         # Append the last bytes (4 bytes in the case of wmi unified)
         # to the saved wmi data array
         self.valid_msg = True
-        return self.append_msg_data(hexdata_a[self.htc_hdr_len + self.wmi_hdr_len:16])
+        return self.append_msg_data(hexdata_a[self.htc_hdr_len:16])
 
     def __continue_frame(self, hexdata):
 

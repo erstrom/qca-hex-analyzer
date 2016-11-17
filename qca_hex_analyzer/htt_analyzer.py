@@ -24,6 +24,7 @@ class HttAnalyzer(Analyzer):
         hexdata_a = hexdata.split(' ', 15)
 
         self.cur_data = []
+        self.cur_trailer = []
         self.valid_msg = False
         self.full_msg = False
         htc_hdr = self.create_htc_hdr(hexdata_a)

@@ -89,3 +89,10 @@ class AllAnalyzer(Analyzer):
             return None
 
         return self.cur_analyzer.get_data_str()
+
+    def get_trailer_str(self):
+
+        if not self.cur_analyzer:
+            return None
+
+        return self.cur_analyzer.get_trailer_str()
