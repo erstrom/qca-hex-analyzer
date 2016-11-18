@@ -53,9 +53,14 @@ class HtcCtrlAnalyzer(Analyzer):
 
         # Examine the HTC header and check if it is a "trailer only"
         # message. A "trailer only" message is a message with no data,
-        # just trailer.
+        # just trailer. These messages will have message id set to the
+        # special value: 0xffff
         data_len = self.get_data_len()
         if data_len == 0:
+            self.htc_ctrl_hdr = self.__create_htc_ctrl_hdr(['ff', 'ff'])
+            self.htc_ctrl_enum = \
+                HtcCtrl.get_msg_id_enum(self.htc_ctrl_hdr.msg_id)
+            self.valid_msg = True
             return self.append_msg_data(hexdata_a[self.htc_hdr_len:16])
 
         htc_ctrl_hdr = self.__create_htc_ctrl_hdr(hexdata_a[self.htc_hdr_len:])

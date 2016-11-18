@@ -10,6 +10,8 @@ class HtcCtrlMsgId(Enum):
     HTC_MSG_SETUP_COMPLETE_ID = 4
     HTC_MSG_SETUP_COMPLETE_EX_ID = 5
     HTC_MSG_SEND_SUSPEND_COMPLETE = 6
+    # Special command enum: Trailer only
+    HTC_MSG_TRAILER_ONLY = 0xffff
 
 
 class HtcCtrl:
