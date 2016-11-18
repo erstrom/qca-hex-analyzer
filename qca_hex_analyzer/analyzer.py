@@ -31,6 +31,13 @@ class Analyzer:
         self.full_data = False
         self.ts = None
 
+    def clear(self):
+
+        self.cur_data = []
+        self.cur_trailer = []
+        self.valid_msg = False
+        self.full_msg = False
+
     def create_htc_hdr(self, hexdata):
 
         if len(hexdata) < self.htc_hdr_len:

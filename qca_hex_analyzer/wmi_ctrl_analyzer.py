@@ -59,10 +59,7 @@ class WmiCtrlAnalyzer(Analyzer):
         # A linux hexdump has 16 values = 15 spaces in one line at most
         hexdata_a = hexdata.split(' ', 15)
 
-        self.cur_data = []
-        self.cur_trailer = []
-        self.valid_msg = False
-        self.full_msg = False
+        self.clear()
         valid_htc_hdr = self.create_htc_hdr(hexdata_a)
         if not valid_htc_hdr:
             return False
