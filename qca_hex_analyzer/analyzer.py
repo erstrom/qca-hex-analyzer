@@ -154,7 +154,7 @@ class Analyzer:
         if not self.valid_msg:
             return None
 
-        str = '\n'
+        str = ''
         str = '{0}00000000:  '.format(str)
         iter_a = self.htc_hdr_data
         for j in range(0, len(iter_a)):
@@ -168,7 +168,7 @@ class Analyzer:
         if not self.valid_msg:
             return None
 
-        str = '\n'
+        str = ''
         no_of_lines = len(self.cur_data) // 16
         iter_a = self.cur_data
         for i in range(0, no_of_lines + 1):
@@ -188,7 +188,7 @@ class Analyzer:
         if not self.valid_msg:
             return None
 
-        str = '\n'
+        str = ''
         no_of_lines = len(self.cur_trailer) // 16
         iter_a = self.cur_trailer
         for i in range(0, no_of_lines + 1):

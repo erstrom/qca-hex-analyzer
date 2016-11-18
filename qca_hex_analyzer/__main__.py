@@ -263,11 +263,11 @@ def main():
                     outfp.write(str)
                     if parsed_args.print_data:
                         htc_hdr_data = analyzer.get_htc_hdr_str()
-                        outfp.write("HTC header: %s\n" % (htc_hdr_data))
+                        outfp.write("HTC header:\n%s" % (htc_hdr_data))
                         msg_data = analyzer.get_data_str()
-                        outfp.write("msg data: %s\n" % (msg_data))
+                        outfp.write("msg data:\n%s" % (msg_data))
                         msg_trailer = analyzer.get_trailer_str()
-                        outfp.write("msg trailer: %s\n" % (msg_trailer))
+                        outfp.write("msg trailer:\n%s\n" % (msg_trailer))
 
     except IOError as err:
         sys.stderr.write('{}\n'.format(err))
