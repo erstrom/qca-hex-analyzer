@@ -83,6 +83,13 @@ class AllAnalyzer(Analyzer):
 
         return self.cur_analyzer.get_id_str()
 
+    def get_htc_hdr_str(self):
+
+        if not self.cur_analyzer:
+                return None
+
+        return self.cur_analyzer.get_htc_hdr_str()
+
     def get_data_str(self):
 
         if not self.cur_analyzer:

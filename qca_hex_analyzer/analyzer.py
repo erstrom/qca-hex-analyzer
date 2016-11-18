@@ -25,6 +25,7 @@ class Analyzer:
         self.valid_msg = False
         self.full_msg = False
         self.htc_hdr = None
+        self.htc_hdr_data = []
         self.cur_data = []
         self.cur_trailer = []
         self.full_data = False
@@ -45,6 +46,7 @@ class Analyzer:
         hdr_len = ((len2 << 8) & 0xFF00) | len1
         hdr = HtcHeader(eid=eid, flags=flags, length=hdr_len, ctrl0=ctrl0,
                         ctrl1=ctrl1)
+        self.htc_hdr_data = hexdata[0:self.htc_hdr_len]
         return hdr
 
     def get_data_len(self):
@@ -139,6 +141,20 @@ class Analyzer:
             return None
 
         return self.cur_data
+
+    def get_htc_hdr_str(self):
+
+        if not self.valid_msg:
+            return None
+
+        str = '\n'
+        str = '{0}00000000:  '.format(str)
+        iter_a = self.htc_hdr_data
+        for j in range(0, len(iter_a)):
+            str = '{0}{1} '.format(str, iter_a[j])
+        str = '{}\n'.format(str)
+
+        return str
 
     def get_data_str(self):
 
