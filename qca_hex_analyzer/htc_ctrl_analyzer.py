@@ -69,6 +69,8 @@ class HtcCtrlAnalyzer(Analyzer):
 
         self.htc_ctrl_hdr = htc_ctrl_hdr
         self.htc_ctrl_enum = HtcCtrl.get_msg_id_enum(self.htc_ctrl_hdr.msg_id)
+        if not self.htc_ctrl_enum:
+            return False
 
         # Append the last bytes to the saved data array
         self.valid_msg = True
