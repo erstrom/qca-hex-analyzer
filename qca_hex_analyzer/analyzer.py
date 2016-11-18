@@ -34,7 +34,7 @@ class Analyzer:
     def create_htc_hdr(self, hexdata):
 
         if len(hexdata) < self.htc_hdr_len:
-            return None
+            return False
 
         eid = int(hexdata[0], 16)
         flags = int(hexdata[1], 16)
@@ -44,10 +44,10 @@ class Analyzer:
         ctrl1 = int(hexdata[5], 16)
         # HTC header lengths is 2 bytes LE
         hdr_len = ((len2 << 8) & 0xFF00) | len1
-        hdr = HtcHeader(eid=eid, flags=flags, length=hdr_len, ctrl0=ctrl0,
-                        ctrl1=ctrl1)
+        self.htc_hdr = HtcHeader(eid=eid, flags=flags, length=hdr_len,
+                                 ctrl0=ctrl0, ctrl1=ctrl1)
         self.htc_hdr_data = hexdata[0:self.htc_hdr_len]
-        return hdr
+        return True
 
     def get_data_len(self):
 

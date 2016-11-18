@@ -44,14 +44,12 @@ class HtcCtrlAnalyzer(Analyzer):
         self.cur_trailer = []
         self.valid_msg = False
         self.full_msg = False
-        htc_hdr = self.create_htc_hdr(hexdata_a)
-        if not htc_hdr:
+        valid_htc_hdr = self.create_htc_hdr(hexdata_a)
+        if not valid_htc_hdr:
             return False
 
-        if htc_hdr.eid != self.eid:
+        if self.htc_hdr.eid != self.eid:
             return False
-
-        self.htc_hdr = htc_hdr
 
         # Examine the HTC header and check if it is a "trailer only"
         # message. A "trailer only" message is a message with no data,

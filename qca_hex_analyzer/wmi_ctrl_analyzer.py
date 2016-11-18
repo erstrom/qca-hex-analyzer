@@ -63,18 +63,17 @@ class WmiCtrlAnalyzer(Analyzer):
         self.cur_trailer = []
         self.valid_msg = False
         self.full_msg = False
-        htc_hdr = self.create_htc_hdr(hexdata_a)
-        if not htc_hdr:
+        valid_htc_hdr = self.create_htc_hdr(hexdata_a)
+        if not valid_htc_hdr:
             return False
 
-        if htc_hdr.eid != self.eid:
+        if self.htc_hdr.eid != self.eid:
             return False
 
         wmi_hdr = self.__create_wmi_hdr(hexdata_a[self.htc_hdr_len:])
         if not wmi_hdr:
             return False
 
-        self.htc_hdr = htc_hdr
         self.wmi_hdr = wmi_hdr
         if self.wmi_unified:
             self.wmi_cmd_enum = WmiUnified.get_cmd_enum(self.wmi_hdr.msg_id)

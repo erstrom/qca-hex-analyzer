@@ -27,11 +27,11 @@ class HttAnalyzer(Analyzer):
         self.cur_trailer = []
         self.valid_msg = False
         self.full_msg = False
-        htc_hdr = self.create_htc_hdr(hexdata_a)
-        if not htc_hdr:
+        valid_htc_hdr = self.create_htc_hdr(hexdata_a)
+        if not valid_htc_hdr:
             return False
 
-        if htc_hdr.eid != self.eid:
+        if self.htc_hdr.eid != self.eid:
             return False
 
         if len(hexdata_a) < self.htc_hdr_len + 1:
@@ -40,7 +40,6 @@ class HttAnalyzer(Analyzer):
         self.htt_id = int(hexdata_a[self.htc_hdr_len], 16)
         self.h2t_enum = Htt.get_h2t_enum(self.htt_id)
         self.t2h_enum = Htt.get_t2h_enum(self.htt_id)
-        self.htc_hdr = htc_hdr
 
         # Append the last bytes to the saved data array
         self.valid_msg = True
