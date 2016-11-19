@@ -11,11 +11,12 @@ WmiHeader = namedtuple('WmiHeader',
 class WmiCtrlAnalyzer(Analyzer):
 
     def __init__(self, eid=1, short_htc_hdr=False, wmi_unified=True,
-                 timestamps=False):
+                 timestamps=False, t2h=False):
 
         Analyzer.__init__(self,
                           short_htc_hdr=short_htc_hdr,
-                          timestamps=timestamps)
+                          timestamps=timestamps,
+                          t2h=t2h)
 
         self.eid = eid
         self.wmi_unified = wmi_unified
@@ -26,8 +27,7 @@ class WmiCtrlAnalyzer(Analyzer):
             self.wmi_hdr_len = 6
 
         self.wmi_hdr = None
-        self.wmi_cmd_enum = None
-        self.wmi_evt_enum = None
+        self.wmi_enum = None
 
     def __create_wmi_hdr(self, hexdata):
 
@@ -73,9 +73,11 @@ class WmiCtrlAnalyzer(Analyzer):
 
         self.wmi_hdr = wmi_hdr
         if self.wmi_unified:
-            self.wmi_cmd_enum = WmiUnified.get_cmd_enum(self.wmi_hdr.msg_id)
-            self.wmi_evt_enum = WmiUnified.get_evt_enum(self.wmi_hdr.msg_id)
-            if not self.wmi_cmd_enum and not self.wmi_evt_enum:
+            if self.t2h:
+                self.wmi_enum = WmiUnified.get_evt_enum(self.wmi_hdr.msg_id)
+            else:
+                self.wmi_enum = WmiUnified.get_cmd_enum(self.wmi_hdr.msg_id)
+            if not self.wmi_enum:
                 # The id was not a valid command or event id, so this can't be
                 # a valid WMI header
                 return False
@@ -117,10 +119,8 @@ class WmiCtrlAnalyzer(Analyzer):
             str = '[{}]'.format(self.ts)
             str = str.ljust(16)
         str = '{}WMI msg id: {:6x}'.format(str, self.wmi_hdr.msg_id)
-        if self.wmi_cmd_enum:
-            str = '{}  cmd: {}'.format(str, self.wmi_cmd_enum.name)
+        if self.wmi_enum:
+            str = '{},  {}'.format(str, self.wmi_enum.name)
             str = str.ljust(70)
-        if self.wmi_evt_enum:
-            str = '{}  evt: {}'.format(str, self.wmi_evt_enum.name)
         str = '{}\n'.format(str)
         return str

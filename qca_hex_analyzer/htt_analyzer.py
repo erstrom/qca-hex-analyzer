@@ -5,15 +5,16 @@ from .analyzer import Analyzer, HtcHeader
 
 class HttAnalyzer(Analyzer):
 
-    def __init__(self, eid=2, short_htc_hdr=False, timestamps=False):
+    def __init__(self, eid=2, short_htc_hdr=False, timestamps=False,
+                 t2h=False):
 
         Analyzer.__init__(self,
                           short_htc_hdr=short_htc_hdr,
-                          timestamps=timestamps)
+                          timestamps=timestamps,
+                          t2h=t2h)
 
         self.eid = eid
-        self.h2t_enum = None
-        self.t2h_enum = None
+        self.enum = None
         self.htt_id = None
 
     def __begin_new_frame(self, hexdata):
@@ -35,8 +36,10 @@ class HttAnalyzer(Analyzer):
             return False
 
         self.htt_id = int(hexdata_a[self.htc_hdr_len], 16)
-        self.h2t_enum = Htt.get_h2t_enum(self.htt_id)
-        self.t2h_enum = Htt.get_t2h_enum(self.htt_id)
+        if self.t2h:
+            self.enum = Htt.get_t2h_enum(self.htt_id)
+        else:
+            self.enum = Htt.get_h2t_enum(self.htt_id)
 
         # Append the last bytes to the saved data array
         self.valid_msg = True
@@ -74,10 +77,8 @@ class HttAnalyzer(Analyzer):
             str = '[{}]'.format(self.ts)
             str = str.ljust(16)
         str = '{}HTT msg id: {:6x}'.format(str, self.htt_id)
-        if self.h2t_enum:
-            str = '{}  h2t: {}'.format(str, self.h2t_enum.name)
+        if self.enum:
+            str = '{},  {}'.format(str, self.enum.name)
             str = str.ljust(70)
-        if self.t2h_enum:
-            str = '{}  t2h: {}'.format(str, self.t2h_enum.name)
         str = '{}\n'.format(str)
         return str

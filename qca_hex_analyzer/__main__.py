@@ -105,9 +105,21 @@ def load_options():
                                   "description filtering will be performed. "
                                   "The prefix of a hexdump is the short "
                                   "description string before the address "
-                                  "in each line of the dump. "
+                                  "in each line of the dump, i.e the hexdump "
+                                  "prefix. "
                                   "--desc-str is normally used to select "
-                                  "between RX and TX logs. ")
+                                  "between RX and TX logs and should be "
+                                  "combined with a proper --data-direction "
+                                  "option.")
+    base_parser.add_argument('-a', '--data-direction', nargs=1, type=str,
+                             help="This option is used to specify how the "
+                                  "hexdata should be interpreted. "
+                                  "Valid values are: "
+                                  "t2h (target to host) or h2t (host to target). "
+                                  "With t2h, RX trailers will be printed if "
+                                  "--print-data is used. h2t is default. "
+                                  "This option should be combined with an "
+                                  "applicable --desc-str option. ")
     base_parser.add_argument('-v', '--desc-str-invert', nargs='+', type=str,
                              help="Description string(s) of the dumps to be. "
                                   "excluded. Similar to --desc-str, but all "
@@ -226,6 +238,18 @@ def main():
         else:
             outfp = sys.stdout
 
+        if parsed_args.data_direction:
+            if parsed_args.data_direction[0] == 't2h':
+                t2h = True
+            elif parsed_args.data_direction[0] == 'h2t':
+                t2h = False
+            else:
+                sys.stderr.write('Unsupported data direction: {}\n'.format(parsed_args.data_direction[0]))
+                exit(1)
+        else:
+            # Interpret the data as host -> target is the default behaviour
+            t2h = False
+
         hf = hexfilter.HexFilterLinux(skip_timestamps=(not parsed_args.keep_timestamps),
                                       abs_timestamps=True,
                                       dump_desc=parsed_args.desc_str,
@@ -238,20 +262,24 @@ def main():
             analyzer = WmiCtrlAnalyzer(eid=parsed_args.ep_id[0],
                                        wmi_unified=(not parsed_args.wmi_old),
                                        short_htc_hdr=parsed_args.short_htc_header,
-                                       timestamps=parsed_args.keep_timestamps)
+                                       timestamps=parsed_args.keep_timestamps,
+                                       t2h=t2h)
         elif parsed_args.subparser_name == 'htc-ctrl':
             analyzer = HtcCtrlAnalyzer(short_htc_hdr=parsed_args.short_htc_header,
-                                       timestamps=parsed_args.keep_timestamps)
+                                       timestamps=parsed_args.keep_timestamps,
+                                       t2h=t2h)
         elif parsed_args.subparser_name == 'htt':
             analyzer = HttAnalyzer(eid=parsed_args.ep_id[0],
                                    short_htc_hdr=parsed_args.short_htc_header,
-                                   timestamps=parsed_args.keep_timestamps)
+                                   timestamps=parsed_args.keep_timestamps,
+                                   t2h=t2h)
         elif parsed_args.subparser_name == 'all':
             analyzer = AllAnalyzer(wmi_ctrl_eid=parsed_args.wmi_ctrl_ep_id[0],
                                    htt_eid=parsed_args.htt_ep_id[0],
                                    wmi_unified=(not parsed_args.wmi_old),
                                    short_htc_hdr=parsed_args.short_htc_header,
-                                   timestamps=parsed_args.keep_timestamps)
+                                   timestamps=parsed_args.keep_timestamps,
+                                   t2h=t2h)
         else:
             sys.stderr.write('Unsupported subcommand: {}\n'.format(parsed_args.subparser_name))
 
@@ -267,7 +295,9 @@ def main():
                         msg_data = analyzer.get_data_str()
                         outfp.write("msg data:\n%s" % (msg_data))
                         msg_trailer = analyzer.get_trailer_str()
-                        outfp.write("msg trailer:\n%s\n" % (msg_trailer))
+                        if msg_trailer:
+                            outfp.write("msg trailer:\n%s" % (msg_trailer))
+                        outfp.write("\n")
 
     except IOError as err:
         sys.stderr.write('{}\n'.format(err))

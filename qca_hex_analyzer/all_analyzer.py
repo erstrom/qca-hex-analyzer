@@ -8,23 +8,27 @@ from .htt_analyzer import HttAnalyzer
 class AllAnalyzer(Analyzer):
 
     def __init__(self, wmi_ctrl_eid=1, htt_eid=2, short_htc_hdr=False,
-                 wmi_unified=True, timestamps=False):
+                 wmi_unified=True, timestamps=False, t2h=False):
 
         Analyzer.__init__(self,
                           short_htc_hdr=short_htc_hdr,
-                          timestamps=timestamps)
+                          timestamps=timestamps,
+                          t2h=t2h)
 
         self.wmi_ctrl_analyzer = WmiCtrlAnalyzer(eid=wmi_ctrl_eid,
                                                  short_htc_hdr=short_htc_hdr,
                                                  wmi_unified=wmi_unified,
-                                                 timestamps=timestamps)
+                                                 timestamps=timestamps,
+                                                 t2h=t2h)
 
         self.htc_ctrl_analyzer = HtcCtrlAnalyzer(short_htc_hdr=short_htc_hdr,
-                                                 timestamps=timestamps)
+                                                 timestamps=timestamps,
+                                                 t2h=t2h)
 
         self.htt_analyzer = HttAnalyzer(eid=htt_eid,
                                         short_htc_hdr=short_htc_hdr,
-                                        timestamps=timestamps)
+                                        timestamps=timestamps,
+                                        t2h=t2h)
 
         self.cur_analyzer = None
 

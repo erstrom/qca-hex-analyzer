@@ -10,11 +10,12 @@ HtcCtrlHeader = namedtuple('HtcCtrlHeader',
 
 class HtcCtrlAnalyzer(Analyzer):
 
-    def __init__(self, short_htc_hdr=False, timestamps=False):
+    def __init__(self, short_htc_hdr=False, timestamps=False, t2h=False):
 
         Analyzer.__init__(self,
                           short_htc_hdr=short_htc_hdr,
-                          timestamps=timestamps)
+                          timestamps=timestamps,
+                          t2h=t2h)
 
         # eid is always 0 for HTC control
         self.eid = 0
@@ -53,7 +54,7 @@ class HtcCtrlAnalyzer(Analyzer):
         # just trailer. These messages will have message id set to the
         # special value: 0xffff
         data_len = self.get_data_len()
-        if data_len == 0:
+        if self.t2h and data_len == 0:
             self.htc_ctrl_hdr = self.__create_htc_ctrl_hdr(['ff', 'ff'])
             self.htc_ctrl_enum = \
                 HtcCtrl.get_msg_id_enum(self.htc_ctrl_hdr.msg_id)
@@ -108,7 +109,7 @@ class HtcCtrlAnalyzer(Analyzer):
             str = str.ljust(16)
         str = '{}HTC ctrl msg id: {:6x}'.format(str, self.htc_ctrl_hdr.msg_id)
         if self.htc_ctrl_enum:
-            str = '{}  string: {}'.format(str, self.htc_ctrl_enum.name)
+            str = '{},  {}'.format(str, self.htc_ctrl_enum.name)
             str = str.ljust(70)
         str = '{}\n'.format(str)
         return str

@@ -13,7 +13,7 @@ HtcHeader = namedtuple('HtcHeader',
 class Analyzer:
     __metaclass__ = ABCMeta
 
-    def __init__(self, short_htc_hdr=False, timestamps=False):
+    def __init__(self, short_htc_hdr=False, timestamps=False, t2h=False):
 
         self.timestamps = timestamps
 
@@ -30,6 +30,7 @@ class Analyzer:
         self.cur_trailer = []
         self.full_data = False
         self.ts = None
+        self.t2h = t2h
 
     def clear(self):
 
@@ -58,10 +59,14 @@ class Analyzer:
 
     def get_data_len(self):
 
-        # Data length is defined as: total length - trailer length
-        return self.htc_hdr.length - self.htc_hdr.ctrl0
+        if self.t2h:
+            # t2h data length is defined as: total length - trailer length
+            return self.htc_hdr.length - self.htc_hdr.ctrl0
+        else:
+            # h2t data length is just: total length
+            return self.htc_hdr.length
 
-    def append_msg_data(self, hexdata_a):
+    def __append_msg_data_t2h(self, hexdata_a):
 
         cur_data_len = self.get_data_len()
         cur_trailer_len = self.htc_hdr.ctrl0
@@ -106,6 +111,32 @@ class Analyzer:
 
         # Not a full message, more data needed...
         return False
+
+    def __append_msg_data_h2t(self, hexdata_a):
+
+        if len(self.cur_data) + len(hexdata_a) >= self.htc_hdr.length:
+            # The data must not exceed the HTC hdr length.
+            # The HTC header length is the length of the payload.
+            # Since there will be padding of the SDIO messages it
+            # is not unlikely that there will be exceeding bytes.
+            exceeding_bytes = \
+                len(self.cur_data) + len(hexdata_a) - self.htc_hdr.length
+            remaining_bytes = len(hexdata_a) - exceeding_bytes
+            self.cur_data += hexdata_a[0:remaining_bytes]
+            # We now have a full message
+            self.full_msg = True
+            return True
+
+        self.cur_data += hexdata_a
+        # Not a full message, more data needed...
+        return False
+
+    def append_msg_data(self, hexdata_a):
+
+        if self.t2h:
+            return self.__append_msg_data_t2h(hexdata_a)
+        else:
+            return self.__append_msg_data_h2t(hexdata_a)
 
     def parse_timestamp(self, hexdata):
 
