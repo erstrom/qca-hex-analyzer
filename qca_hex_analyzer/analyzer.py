@@ -121,17 +121,7 @@ class Analyzer:
         pass
 
     @abstractmethod
-    def get_id(self):
-
-        pass
-
-    @abstractmethod
     def get_id_str(self):
-
-        pass
-
-    @abstractmethod
-    def get_enums(self):
 
         pass
 

@@ -107,24 +107,6 @@ class WmiCtrlAnalyzer(Analyzer):
         else:
             return self.__continue_frame(hexdata_split1[1])
 
-    def get_id(self):
-
-        if not self.wmi_hdr:
-            return None
-
-        return self.wmi_hdr.msg_id
-
-    def get_enums(self):
-
-        return (self.wmi_cmd_enum, self.wmi_evt_enum)
-
-    def get_id_grp(self):
-
-        if not self.wmi_hdr:
-            return None
-
-        return WmiUnified.get_cmd_group(self.wmi_hdr.msg_id)
-
     def get_id_str(self):
 
         if not self.wmi_hdr:

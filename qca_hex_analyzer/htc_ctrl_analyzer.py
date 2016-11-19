@@ -97,17 +97,6 @@ class HtcCtrlAnalyzer(Analyzer):
         else:
             return self.__continue_frame(hexdata_split1[1])
 
-    def get_id(self):
-
-        if not self.htc_ctrl_hdr:
-            return None
-
-        return self.htc_ctrl_hdr.msg_id
-
-    def get_enums(self):
-
-        return (self.htc_ctrl_enum, self.htc_ctrl_enum)
-
     def get_id_str(self):
 
         if not self.htc_ctrl_hdr:

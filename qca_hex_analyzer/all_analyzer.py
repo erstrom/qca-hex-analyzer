@@ -62,20 +62,6 @@ class AllAnalyzer(Analyzer):
         else:
             return False
 
-    def get_id(self):
-
-        if not self.cur_analyzer:
-            return None
-
-        return self.cur_analyzer.get_id()
-
-    def get_enums(self):
-
-        if not self.cur_analyzer:
-            return None
-
-        return self.cur_analyzer.get_enums()
-
     def get_id_str(self):
 
         if not self.cur_analyzer:

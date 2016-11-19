@@ -64,14 +64,6 @@ class HttAnalyzer(Analyzer):
         else:
             return self.__continue_frame(hexdata_split1[1])
 
-    def get_id(self):
-
-        return self.htt_id
-
-    def get_enums(self):
-
-        return (self.h2t_enum, self.t2h_enum)
-
     def get_id_str(self):
 
         if self.htt_id is None:
