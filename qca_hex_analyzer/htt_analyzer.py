@@ -79,6 +79,5 @@ class HttAnalyzer(Analyzer):
         str = '{}HTT msg id: {:6x}'.format(str, self.htt_id)
         if self.enum:
             str = '{},  {}'.format(str, self.enum.name)
-            str = str.ljust(70)
         str = '{}\n'.format(str)
         return str

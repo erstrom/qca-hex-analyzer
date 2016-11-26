@@ -121,6 +121,5 @@ class WmiCtrlAnalyzer(Analyzer):
         str = '{}WMI msg id: {:6x}'.format(str, self.wmi_hdr.msg_id)
         if self.wmi_enum:
             str = '{},  {}'.format(str, self.wmi_enum.name)
-            str = str.ljust(70)
         str = '{}\n'.format(str)
         return str

@@ -110,6 +110,5 @@ class HtcCtrlAnalyzer(Analyzer):
         str = '{}HTC ctrl msg id: {:6x}'.format(str, self.htc_ctrl_hdr.msg_id)
         if self.htc_ctrl_enum:
             str = '{},  {}'.format(str, self.htc_ctrl_enum.name)
-            str = str.ljust(70)
         str = '{}\n'.format(str)
         return str
