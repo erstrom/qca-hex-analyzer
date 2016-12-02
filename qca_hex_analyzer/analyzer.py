@@ -39,6 +39,18 @@ class Analyzer:
         self.valid_msg = False
         self.full_msg = False
 
+    def __validate_htc_hdr(self):
+
+        # Below are a few criterias that must hold for all HTC headers.
+        # This function will return False if the criterias are not met.
+        if self.htc_hdr.length == 0:
+            return False
+
+        if self.t2h and self.htc_hdr.ctrl0 > self.htc_hdr.length:
+            return False
+
+        return True
+
     def create_htc_hdr(self, hexdata):
 
         if len(hexdata) < self.htc_hdr_len:
@@ -54,6 +66,9 @@ class Analyzer:
         hdr_len = ((len2 << 8) & 0xFF00) | len1
         self.htc_hdr = HtcHeader(eid=eid, flags=flags, length=hdr_len,
                                  ctrl0=ctrl0, ctrl1=ctrl1)
+        if not self.__validate_htc_hdr():
+            return False
+
         self.htc_hdr_data = hexdata[0:self.htc_hdr_len]
         return True
 
