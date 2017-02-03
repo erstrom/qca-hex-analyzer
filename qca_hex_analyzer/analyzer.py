@@ -238,3 +238,14 @@ class Analyzer:
             iter_a = iter_a[iter_len:]
 
         return str
+
+    def print_data(self, fp):
+
+        htc_hdr_data = self.get_htc_hdr_str()
+        fp.write("HTC header:\n%s" % (htc_hdr_data))
+        msg_data = self.get_data_str()
+        fp.write("msg data:\n%s" % (msg_data))
+        msg_trailer = self.get_trailer_str()
+        if msg_trailer:
+            fp.write("msg trailer:\n%s" % (msg_trailer))
+        fp.write("\n")
