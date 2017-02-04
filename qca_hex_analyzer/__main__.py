@@ -162,11 +162,11 @@ def load_options():
                                       "target in the HTC service connect response). "
                                       "If this option is omitted a default value of 2 "
                                       "will be used.")
-    parser_wmi_ctrl = subparsers.add_parser('htc-ctrl',
+    parser_htc_ctrl = subparsers.add_parser('htc-ctrl',
                                             help=htc_ctrl_help,
                                             description=htc_ctrl_description,
                                             parents=[base_parser])
-    parser_wmi_ctrl.add_argument('-p', '--print-data', action="store_true",
+    parser_htc_ctrl.add_argument('-p', '--print-data', action="store_true",
                                  help="Print HTC ctrl data message payload (and not just "
                                       "message ID) for all encountered messages. ")
     parser_htt = subparsers.add_parser('htt',
