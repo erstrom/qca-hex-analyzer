@@ -361,6 +361,7 @@ class WmiUnifiedCmd(Enum):
     WMI_UNIFIED_MAWC_SENSOR_REPORT_IND_CMDID = 0x34001
 
     WMI_UNIFIED_PMF_OFFLOAD_SET_SA_QUERY_CMDID = 0x35001
+    WMI_UNIFIED_UNKNOWN = 0xFFFFF
 
 
 @unique
@@ -430,6 +431,7 @@ class WmiUnifiedEvt(Enum):
 
     # GPIO Event
     WMI_GPIO_INPUT_EVENTID = 0x1e001
+    WMI_UNIFIED_UNKNOWN = 0xFFFFF
 
 
 class WmiUnified:
@@ -450,7 +452,7 @@ class WmiUnified:
         try:
             return WmiUnifiedCmd(cmd_id)
         except ValueError:
-            return None
+            return WmiUnifiedCmd.WMI_UNIFIED_UNKNOWN
 
     @staticmethod
     def get_evt_enum(evt_id):
@@ -458,4 +460,4 @@ class WmiUnified:
         try:
             return WmiUnifiedEvt(evt_id)
         except ValueError:
-            return None
+            return WmiUnifiedEvt.WMI_UNIFIED_UNKNOWN

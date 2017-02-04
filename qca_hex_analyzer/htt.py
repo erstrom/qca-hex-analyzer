@@ -14,6 +14,7 @@ class HttH2tMsgType(Enum):
     HTT_H2T_MSG_TYPE_WDI_IPA_CFG = 0x8
     HTT_H2T_MSG_TYPE_WDI_IPA_OP_REQ = 0x9
     HTT_H2T_MSG_TYPE_AGGR_CFG_EX = 0xa
+    HTT_H2T_MSG_TYPE_UNKNOWN = 0xFFFFF
 
 
 class HttT2hMsgType(Enum):
@@ -44,6 +45,7 @@ class HttT2hMsgType(Enum):
     HTT_T2H_MSG_TYPE_FLOW_POOL_MAP = 0x18
     HTT_T2H_MSG_TYPE_FLOW_POOL_UNMAP = 0x19
     HTT_T2H_MSG_TYPE_TEST = 0x20
+    HTT_T2H_MSG_TYPE_UNKNOWN = 0xFFFFF
 
 
 class Htt:
@@ -54,7 +56,7 @@ class Htt:
         try:
             return HttH2tMsgType(h2t_id)
         except ValueError:
-            return None
+            return HttH2tMsgType.HTT_H2T_MSG_TYPE_UNKNOWN
 
     @staticmethod
     def get_t2h_enum(t2h_id):
@@ -62,4 +64,4 @@ class Htt:
         try:
             return HttT2hMsgType(t2h_id)
         except ValueError:
-            return None
+            return HttT2hMsgType.HTT_T2H_MSG_TYPE_UNKNOWN
