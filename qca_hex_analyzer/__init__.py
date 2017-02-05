@@ -12,6 +12,7 @@ from .wmi_tlv import WmiTlvMsg
 from .wmi_tlv import WmiTlvMsgPdevSetParam
 from .wmi_tlv import WmiTlvMsgPdevSetRegDomain
 from .wmi_tlv import WmiTlvMsgVdevCreate
+from .wmi_tlv import WmiTlvMsgVdevStartReq
 from .wmi_tlv import WmiTlvMsgVdevSetParam
 from .htc_ctrl import HtcCtrl
 from .htt import Htt

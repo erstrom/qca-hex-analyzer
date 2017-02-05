@@ -16,6 +16,21 @@ VdevCreateMsg = namedtuple('VdevCreateMsg',
                             'vdev_subtype', 'mac_addr'],
                            verbose=False)
 
+WmiChannel = namedtuple('WmiChannel',
+                        ['tlv_hdr', 'mhz', 'band_center_freq1',
+                         'band_center_freq2', 'mode', 'min_power',
+                         'max_power', 'reg_power', 'reg_classid',
+                         'antenna_max', 'max_tx_power'],
+                        verbose=False)
+
+VdevStartReqMsg = namedtuple('VdevStartReqMsg',
+                             ['tlv_hdr', 'vdev_id', 'requestor_id',
+                              'bcn_intval', 'dtim_period', 'flags',
+                              'ssid_len', 'ssid', 'bcn_tx_rate',
+                              'bcn_tx_power', 'num_noa_descr',
+                              'disable_hw_ack', 'wmi_chan'],
+                             verbose=False)
+
 VdevSetParamMsg = namedtuple('VdevSetParamMsg',
                              ['tlv_hdr', 'vdev_id', 'param_id',
                               'param_value'],
@@ -165,6 +180,100 @@ class WmiTlvMsgVdevCreate(WmiTlvMsg):
         fp.write("vdev_type: 0x%x\n" % (self.tlv_msg.vdev_type))
         fp.write("vdev_subtype: 0x%x\n" % (self.tlv_msg.vdev_subtype))
         fp.write("mac_addr: %s\n" % (self.tlv_msg.mac_addr))
+
+
+class WmiTlvMsgVdevStartReq(WmiTlvMsg):
+
+    def __init__(self, data):
+
+        tlv_hdr = _create_tlv_hdr(data)
+        if tlv_hdr.length < 72:
+            return None
+
+        vdev_id = _create_le32(data[4:8])
+        requestor_id = _create_le32(data[8:12])
+        bcn_intval = _create_le32(data[12:16])
+        dtim_period = _create_le32(data[16:20])
+        flags = _create_le32(data[20:24])
+        ssid_len = _create_le32(data[24:28])
+        ssid = data[28:60]
+        bcn_tx_rate = _create_le32(data[60:64])
+        bcn_tx_power = _create_le32(data[64:68])
+        num_noa_descr = _create_le32(data[68:72])
+        disable_hw_ack = _create_le32(data[72:76])
+
+        wmi_chan = None
+        tlv_hdr2 = _create_tlv_hdr(data[76:])
+        if len(data) >= tlv_hdr.length + tlv_hdr2.length:
+            ch_data = data[80:]
+            mhz = _create_le32(ch_data[0:4])
+            band_center_freq1 = _create_le32(ch_data[4:8])
+            band_center_freq2 = _create_le32(ch_data[8:12])
+            mode = int(ch_data[12], 16)
+            min_power = int(ch_data[16], 16)
+            max_power = int(ch_data[17], 16)
+            reg_power = int(ch_data[18], 16)
+            reg_classid = int(ch_data[19], 16)
+            antenna_max = int(ch_data[20], 16)
+            max_tx_power = int(ch_data[21], 16)
+
+            wmi_chan = WmiChannel(tlv_hdr=tlv_hdr2,
+                                  mhz=mhz,
+                                  band_center_freq1=band_center_freq1,
+                                  band_center_freq2=band_center_freq2,
+                                  mode=mode,
+                                  min_power=min_power,
+                                  max_power=max_power,
+                                  reg_power=reg_power,
+                                  reg_classid=reg_classid,
+                                  antenna_max=antenna_max,
+                                  max_tx_power=max_tx_power)
+
+        self.tlv_msg = VdevStartReqMsg(tlv_hdr=tlv_hdr,
+                                       vdev_id=vdev_id,
+                                       requestor_id=requestor_id,
+                                       bcn_intval=bcn_intval,
+                                       dtim_period=dtim_period,
+                                       flags=flags,
+                                       ssid_len=ssid_len,
+                                       ssid=ssid,
+                                       bcn_tx_rate=bcn_tx_rate,
+                                       bcn_tx_power=bcn_tx_power,
+                                       num_noa_descr=num_noa_descr,
+                                       disable_hw_ack=disable_hw_ack,
+                                       wmi_chan=wmi_chan)
+
+    def print_data(self, fp):
+
+        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
+        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
+                                           self.tlv_msg.tlv_hdr.tag.name))
+        fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
+        fp.write("requestor_id: 0x%x\n" % (self.tlv_msg.requestor_id))
+        fp.write("bcn_intval: 0x%x\n" % (self.tlv_msg.bcn_intval))
+        fp.write("dtim_period: 0x%x\n" % (self.tlv_msg.dtim_period))
+        fp.write("flags: 0x%x\n" % (self.tlv_msg.flags))
+        fp.write("ssid_len: 0x%x\n" % (self.tlv_msg.ssid_len))
+        fp.write("ssid: %s\n" % (self.tlv_msg.ssid))
+        fp.write("bcn_tx_rate: 0x%x\n" % (self.tlv_msg.bcn_tx_rate))
+        fp.write("bcn_tx_power: 0x%x\n" % (self.tlv_msg.bcn_tx_power))
+        fp.write("num_noa_descr: 0x%x\n" % (self.tlv_msg.num_noa_descr))
+        fp.write("disable_hw_ack: 0x%x\n" % (self.tlv_msg.disable_hw_ack))
+        if self.tlv_msg.wmi_chan is not None:
+            fp.write("wmi chan:\n")
+            fp.write("  TLV length: %d\n" % (self.tlv_msg.wmi_chan.tlv_hdr.length))
+            fp.write("  TLV tag: 0x%x (%s)\n" % (self.tlv_msg.wmi_chan.tlv_hdr.tag.value,
+                                                 self.tlv_msg.wmi_chan.tlv_hdr.tag.name))
+            fp.write("  mhz: %d\n" % (self.tlv_msg.wmi_chan.mhz))
+            fp.write("  band_center_freq1: %d\n" % (self.tlv_msg.wmi_chan.band_center_freq1))
+            fp.write("  band_center_freq2: %d\n" % (self.tlv_msg.wmi_chan.band_center_freq2))
+            fp.write("  mode: %d\n" % (self.tlv_msg.wmi_chan.mode))
+            fp.write("  min_power: %d\n" % (self.tlv_msg.wmi_chan.min_power))
+            fp.write("  max_power: %d\n" % (self.tlv_msg.wmi_chan.max_power))
+            fp.write("  reg_power: %d\n" % (self.tlv_msg.wmi_chan.reg_power))
+            fp.write("  reg_classid: %d\n" % (self.tlv_msg.wmi_chan.reg_classid))
+            fp.write("  antenna_max: %d\n" % (self.tlv_msg.wmi_chan.antenna_max))
+            fp.write("  max_tx_power: %d\n" % (self.tlv_msg.wmi_chan.max_tx_power))
 
 
 class WmiTlvMsgVdevSetParam(WmiTlvMsg):
