@@ -12,7 +12,8 @@ WmiHeader = namedtuple('WmiHeader',
 class WmiCtrlAnalyzer(Analyzer):
 
     def __init__(self, eid=1, short_htc_hdr=False, wmi_unified=True,
-                 timestamps=False, t2h=False, tlv_analysis=False):
+                 timestamps=False, t2h=False, tlv_analysis=False,
+                 msg_id_filter=None, msg_id_exclude_filter=None):
 
         Analyzer.__init__(self,
                           short_htc_hdr=short_htc_hdr,
@@ -22,6 +23,8 @@ class WmiCtrlAnalyzer(Analyzer):
         self.eid = eid
         self.wmi_unified = wmi_unified
         self.tlv_analysis = tlv_analysis
+        self.msg_id_filter = msg_id_filter
+        self.msg_id_exclude_filter = msg_id_exclude_filter
 
         if wmi_unified:
             self.wmi_hdr_len = 4
@@ -105,6 +108,32 @@ class WmiCtrlAnalyzer(Analyzer):
         elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_VDEV_CREATE_CMDID:
             self.tlv_msg = WmiTlvMsgVdevCreate(self.cur_data[4:])
 
+    def __match_id(self, msg_id_filter):
+
+        matching_id_found = False
+
+        for msg_id in msg_id_filter:
+            if msg_id == self.wmi_hdr.msg_id:
+                matching_id_found = True
+                break
+
+        return matching_id_found
+
+    # returns true if the message should be kept, false otherwise
+    def __keep_message(self):
+
+        if self.msg_id_filter is not None:
+            if self.__match_id(self.msg_id_filter):
+                return True
+            else:
+                return False
+        if self.msg_id_exclude_filter is not None:
+            if self.__match_id(self.msg_id_exclude_filter):
+                return False
+            else:
+                return True
+        return True
+
     def parse_hexdata(self, hexdata):
 
         self.tlv_msg = None
@@ -119,10 +148,17 @@ class WmiCtrlAnalyzer(Analyzer):
         else:
             full_msg = self.__continue_frame(hexdata_split1[1])
 
-        if full_msg and self.tlv_analysis:
+        if not full_msg:
+            return False
+
+        # Apply the WMI id filters
+        if not self.__keep_message():
+            return False
+
+        if self.tlv_analysis:
             self.__parse_tlv_data()
 
-        return full_msg
+        return True
 
     def get_id_str(self):
 

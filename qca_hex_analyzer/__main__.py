@@ -82,6 +82,11 @@ all_description = \
     "message ID's if the --print-data option is used."
 
 
+def auto_int(x):
+
+    return int(x, 0)
+
+
 def load_options():
 
     global parsed_args
@@ -169,6 +174,18 @@ def load_options():
                                       "written out in text (instead of hexdump). "
                                       "If the encountered message is not supported by "
                                       "the parser, the hex data will be printed instead.")
+    parser_wmi_ctrl.add_argument('--id', '--msg-id', metavar='ID',
+                                 nargs='+', type=auto_int,
+                                 help="WMI message id filter. "
+                                      "Only WMI messages with an id matching any of the "
+                                      "provided id's will be included in the output. "
+                                      "If no --id | --msg-id option is given, no "
+                                      "filtering will be performed. ")
+    parser_wmi_ctrl.add_argument('--skip-id', '--skip-msg-id', metavar='ID',
+                                 nargs='+', type=auto_int,
+                                 help="WMI message id exclude filter. "
+                                      "Similar to --id | --msg-id, but all matching "
+                                      "id's will be excluded from the output. ")
     parser_htc_ctrl = subparsers.add_parser('htc-ctrl',
                                             help=htc_ctrl_help,
                                             description=htc_ctrl_description,
@@ -271,7 +288,9 @@ def main():
                                        short_htc_hdr=parsed_args.short_htc_header,
                                        timestamps=parsed_args.keep_timestamps,
                                        t2h=t2h,
-                                       tlv_analysis=parsed_args.tlv)
+                                       tlv_analysis=parsed_args.tlv,
+                                       msg_id_filter=parsed_args.id,
+                                       msg_id_exclude_filter=parsed_args.skip_id)
             if parsed_args.tlv:
                 parsed_args.print_data = True
         elif parsed_args.subparser_name == 'htc-ctrl':
