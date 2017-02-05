@@ -77,7 +77,7 @@ class WmiTlvMsgPdevSetParam(WmiTlvMsg):
 
         tlv_hdr = _create_tlv_hdr(data)
         if tlv_hdr.length < 12:
-            return False
+            return None
 
         param = _create_le32(data[8:12])
         value = _create_le32(data[12:16])
@@ -107,7 +107,7 @@ class WmiTlvMsgPdevSetRegDomain(WmiTlvMsg):
 
         tlv_hdr = _create_tlv_hdr(data)
         if tlv_hdr.length < 24:
-            return False
+            return None
 
         pdev_id = _create_le32(data[4:8])
         regd = _create_le32(data[8:12])
@@ -143,7 +143,7 @@ class WmiTlvMsgVdevCreate(WmiTlvMsg):
 
         tlv_hdr = _create_tlv_hdr(data)
         if tlv_hdr.length < 20:
-            return False
+            return None
 
         vdev_id = _create_le32(data[4:8])
         vdev_type = _create_le32(data[8:12])
@@ -173,7 +173,7 @@ class WmiTlvMsgVdevSetParam(WmiTlvMsg):
 
         tlv_hdr = _create_tlv_hdr(data)
         if tlv_hdr.length < 12:
-            return False
+            return None
 
         vdev_id = _create_le32(data[4:8])
         param_id = _create_le32(data[8:12])
