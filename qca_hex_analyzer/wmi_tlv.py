@@ -21,6 +21,13 @@ VdevSetParamMsg = namedtuple('VdevSetParamMsg',
                               'param_value'],
                              verbose=False)
 
+PdevSetRegDomainMsg = namedtuple('PdevSetRegDomainMsg',
+                                 ['tlv_hdr', 'pdev_id', 'regd',
+                                  'regd_2ghz', 'regd_5ghz',
+                                  'conform_limit_2ghz',
+                                  'conform_limit_5ghz'],
+                                 verbose=False)
+
 
 def _create_le32(data):
 
@@ -92,6 +99,42 @@ class WmiTlvMsgPdevSetParam(WmiTlvMsg):
         fp.write("param: 0x%x (%s)\n" % (self.tlv_msg.param.value,
                                          self.tlv_msg.param.name))
         fp.write("value: 0x%x\n" % (self.tlv_msg.value))
+
+
+class WmiTlvMsgPdevSetRegDomain(WmiTlvMsg):
+
+    def __init__(self, data):
+
+        tlv_hdr = _create_tlv_hdr(data)
+        if tlv_hdr.length < 24:
+            return False
+
+        pdev_id = _create_le32(data[4:8])
+        regd = _create_le32(data[8:12])
+        regd_2ghz = _create_le32(data[12:16])
+        regd_5ghz = _create_le32(data[16:20])
+        conform_limit_2ghz = _create_le32(data[20:24])
+        conform_limit_5ghz = _create_le32(data[24:28])
+
+        self.tlv_msg = PdevSetRegDomainMsg(tlv_hdr=tlv_hdr,
+                                           pdev_id=pdev_id,
+                                           regd=regd,
+                                           regd_2ghz=regd_2ghz,
+                                           regd_5ghz=regd_5ghz,
+                                           conform_limit_2ghz=conform_limit_2ghz,
+                                           conform_limit_5ghz=conform_limit_5ghz)
+
+    def print_data(self, fp):
+
+        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
+        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
+                                           self.tlv_msg.tlv_hdr.tag.name))
+        fp.write("pdev_id: 0x%x\n" % (self.tlv_msg.pdev_id))
+        fp.write("regd: 0x%x\n" % (self.tlv_msg.regd))
+        fp.write("regd_2ghz: 0x%x\n" % (self.tlv_msg.regd_2ghz))
+        fp.write("regd_5ghz: 0x%x\n" % (self.tlv_msg.regd_5ghz))
+        fp.write("conform_limit_2ghz: 0x%x\n" % (self.tlv_msg.conform_limit_2ghz))
+        fp.write("conform_limit_5ghz: 0x%x\n" % (self.tlv_msg.conform_limit_5ghz))
 
 
 class WmiTlvMsgVdevCreate(WmiTlvMsg):

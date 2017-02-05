@@ -1,7 +1,7 @@
 from collections import namedtuple
 from .wmi_unified import WmiUnified, WmiUnifiedCmd, WmiUnifiedCmdGrpId
 from .wmi_tlv import WmiTlvMsg, WmiTlvMsgPdevSetParam, WmiTlvMsgVdevCreate, \
-                     WmiTlvMsgVdevSetParam
+                     WmiTlvMsgVdevSetParam, WmiTlvMsgPdevSetRegDomain
 from .analyzer import Analyzer, HtcHeader
 
 
@@ -106,6 +106,8 @@ class WmiCtrlAnalyzer(Analyzer):
 
         if self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_PDEV_SET_PARAM_CMDID:
             self.tlv_msg = WmiTlvMsgPdevSetParam(self.cur_data[4:])
+        elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_PDEV_SET_REGDOMAIN_CMDID:
+            self.tlv_msg = WmiTlvMsgPdevSetRegDomain(self.cur_data[4:])
         elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_VDEV_CREATE_CMDID:
             self.tlv_msg = WmiTlvMsgVdevCreate(self.cur_data[4:])
         elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_VDEV_SET_PARAM_CMDID:
@@ -180,12 +182,11 @@ class WmiCtrlAnalyzer(Analyzer):
 
     def print_data(self, fp):
 
-        htc_hdr_data = self.get_htc_hdr_str()
-        fp.write("HTC header:\n%s" % (htc_hdr_data))
-
         if self.tlv_analysis and self.tlv_msg:
             self.tlv_msg.print_data(fp)
         else:
+            htc_hdr_data = self.get_htc_hdr_str()
+            fp.write("HTC header:\n%s" % (htc_hdr_data))
             msg_data = self.get_data_str()
             fp.write("msg data:\n%s" % (msg_data))
             msg_trailer = self.get_trailer_str()
