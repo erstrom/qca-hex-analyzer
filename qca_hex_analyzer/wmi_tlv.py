@@ -87,7 +87,8 @@ class WmiTlvMsgPdevSetParam(WmiTlvMsg):
     def print_data(self, fp):
 
         fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
-        fp.write("TLV tag: %s\n" % (self.tlv_msg.tlv_hdr.tag))
+        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
+                                           self.tlv_msg.tlv_hdr.tag.name))
         fp.write("param: 0x%x (%s)\n" % (self.tlv_msg.param.value,
                                          self.tlv_msg.param.name))
         fp.write("value: 0x%x\n" % (self.tlv_msg.value))
@@ -115,7 +116,8 @@ class WmiTlvMsgVdevCreate(WmiTlvMsg):
     def print_data(self, fp):
 
         fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
-        fp.write("TLV tag: %s\n" % (self.tlv_msg.tlv_hdr.tag))
+        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
+                                           self.tlv_msg.tlv_hdr.tag.name))
         fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
         fp.write("vdev_type: 0x%x\n" % (self.tlv_msg.vdev_type))
         fp.write("vdev_subtype: 0x%x\n" % (self.tlv_msg.vdev_subtype))
@@ -147,7 +149,8 @@ class WmiTlvMsgVdevSetParam(WmiTlvMsg):
     def print_data(self, fp):
 
         fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
-        fp.write("TLV tag: %s\n" % (self.tlv_msg.tlv_hdr.tag))
+        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
+                                           self.tlv_msg.tlv_hdr.tag.name))
         fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
         fp.write("param_id: 0x%x (%s)\n" % (self.tlv_msg.param_id.value,
                                             self.tlv_msg.param_id.name))
