@@ -16,6 +16,11 @@ VdevCreateMsg = namedtuple('VdevCreateMsg',
                             'vdev_subtype', 'mac_addr'],
                            verbose=False)
 
+VdevSetParamMsg = namedtuple('VdevSetParamMsg',
+                             ['tlv_hdr', 'vdev_id', 'param_id',
+                              'param_value'],
+                             verbose=False)
+
 
 def _create_le32(data):
 
@@ -109,6 +114,32 @@ class WmiTlvMsgVdevCreate(WmiTlvMsg):
         fp.write("vdev_type: 0x%x\n" % (self.tlv_msg.vdev_type))
         fp.write("vdev_subtype: 0x%x\n" % (self.tlv_msg.vdev_subtype))
         fp.write("mac_addr: %s\n" % (self.tlv_msg.mac_addr))
+
+
+class WmiTlvMsgVdevSetParam(WmiTlvMsg):
+
+    def __init__(self, data):
+
+        tlv_hdr = _create_tlv_hdr(data)
+        if tlv_hdr.length < 12:
+            return False
+
+        vdev_id = _create_le32(data[4:8])
+        param_id = _create_le32(data[8:12])
+        param_value = _create_le32(data[12:16])
+
+        self.tlv_msg = VdevSetParamMsg(tlv_hdr=tlv_hdr,
+                                       vdev_id=vdev_id,
+                                       param_id=param_id,
+                                       param_value=param_value)
+
+    def print_data(self, fp):
+
+        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
+        fp.write("TLV tag: %s\n" % (self.tlv_msg.tlv_hdr.tag))
+        fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
+        fp.write("param_id: 0x%x\n" % (self.tlv_msg.param_id))
+        fp.write("param_value: 0x%x\n" % (self.tlv_msg.param_value))
 
 
 @unique
