@@ -162,6 +162,13 @@ def load_options():
                                       "target in the HTC service connect response). "
                                       "If this option is omitted a default value of 2 "
                                       "will be used.")
+    parser_wmi_ctrl.add_argument('--tlv', action="store_true",
+                                 help="TLV analysis."
+                                      "Each WMI message will be interpreted as a TLV "
+                                      "message and the content of the message will be. "
+                                      "written out in text (instead of hexdump). "
+                                      "If the encountered message is not supported by "
+                                      "the parser, the hex data will be printed instead.")
     parser_htc_ctrl = subparsers.add_parser('htc-ctrl',
                                             help=htc_ctrl_help,
                                             description=htc_ctrl_description,
@@ -263,7 +270,10 @@ def main():
                                        wmi_unified=(not parsed_args.wmi_old),
                                        short_htc_hdr=parsed_args.short_htc_header,
                                        timestamps=parsed_args.keep_timestamps,
-                                       t2h=t2h)
+                                       t2h=t2h,
+                                       tlv_analysis=parsed_args.tlv)
+            if parsed_args.tlv:
+                parsed_args.print_data = True
         elif parsed_args.subparser_name == 'htc-ctrl':
             analyzer = HtcCtrlAnalyzer(short_htc_hdr=parsed_args.short_htc_header,
                                        timestamps=parsed_args.keep_timestamps,

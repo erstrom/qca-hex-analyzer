@@ -8,6 +8,9 @@ from .wmi_unified import WmiUnified
 from .wmi_unified import WmiUnifiedCmd
 from .wmi_unified import WmiUnifiedEvt
 from .wmi_unified import WmiUnifiedCmdGrpId
+from .wmi_tlv import WmiTlvMsg
+from .wmi_tlv import WmiTlvMsgPdevSetParam
+from .wmi_tlv import WmiTlvMsgVdevCreate
 from .htc_ctrl import HtcCtrl
 from .htt import Htt
 from .htt import HttH2tMsgType
