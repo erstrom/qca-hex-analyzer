@@ -43,6 +43,11 @@ PdevSetRegDomainMsg = namedtuple('PdevSetRegDomainMsg',
                                   'conform_limit_5ghz'],
                                  verbose=False)
 
+PeerCreateMsg = namedtuple('PeerCreateMsg',
+                           ['tlv_hdr', 'vdev_id', 'peer_addr',
+                            'peer_type'],
+                           verbose=False)
+
 PeerSetParamMsg = namedtuple('PeerSetParamMsg',
                              ['tlv_hdr', 'vdev_id', 'peer_macaddr',
                               'param_id', 'param_value'],
@@ -313,6 +318,39 @@ class WmiTlvMsgVdevSetParam(WmiTlvMsg):
         fp.write("param_id: 0x%x (%s)\n" % (self.tlv_msg.param_id.value,
                                             self.tlv_msg.param_id.name))
         fp.write("param_value: 0x%x\n" % (self.tlv_msg.param_value))
+
+
+class WmiTlvMsgPeerCreate(WmiTlvMsg):
+
+    def __init__(self, data):
+
+        tlv_hdr = _create_tlv_hdr(data)
+        if tlv_hdr.length < 16:
+            return None
+
+        vdev_id = _create_le32(data[4:])
+        peer_addr = data[8:16]
+        peer_type = _create_le32(data[16:])
+
+        try:
+            peer_type_enum = WmiTlvPeerType(peer_type)
+        except ValueError:
+            peer_type_enum = WmiTlvPeerType.WMI_PEER_TYPE_UNKNOWN
+
+        self.tlv_msg = PeerCreateMsg(tlv_hdr=tlv_hdr,
+                                     vdev_id=vdev_id,
+                                     peer_addr=peer_addr,
+                                     peer_type=peer_type_enum)
+
+    def print_data(self, fp):
+
+        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
+        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
+                                           self.tlv_msg.tlv_hdr.tag.name))
+        fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
+        fp.write("peer_addr: %s\n" % (self.tlv_msg.peer_addr))
+        fp.write("peer_type: 0x%x (%s)\n" % (self.tlv_msg.peer_type.value,
+                                             self.tlv_msg.peer_type.name))
 
 
 class WmiTlvMsgPeerSetParam(WmiTlvMsg):
@@ -857,3 +895,13 @@ class WmiTlvPeerParam(Enum):
     WMI_PEER_USE_4ADDR = 0x6
     WMI_PEER_DUMMY_VAR = 0xFF
     WMI_PEER_PARAM_UNKNOWN = 0xFFFF
+
+
+@unique
+class WmiTlvPeerType(Enum):
+
+    WMI_TLV_PEER_TYPE_DEFAULT = 0
+    WMI_TLV_PEER_TYPE_BSS = 1
+    WMI_TLV_PEER_TYPE_TDLS = 2
+    WMI_TLV_PEER_TYPE_HOST_MAX = 127
+    WMI_TLV_PEER_TYPE_ROAMOFFLOAD_TMP = 128
