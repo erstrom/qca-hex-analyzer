@@ -2,7 +2,7 @@ from collections import namedtuple
 from .wmi_unified import WmiUnified, WmiUnifiedCmd, WmiUnifiedCmdGrpId
 from .wmi_tlv import WmiTlvMsg, WmiTlvMsgPdevSetParam, WmiTlvMsgVdevCreate, \
                      WmiTlvMsgVdevSetParam, WmiTlvMsgVdevStartReq, \
-                     WmiTlvMsgPdevSetRegDomain
+                     WmiTlvMsgPdevSetRegDomain, WmiTlvMsgPeerSetParam
 from .analyzer import Analyzer, HtcHeader
 
 
@@ -115,6 +115,8 @@ class WmiCtrlAnalyzer(Analyzer):
             self.tlv_msg = WmiTlvMsgVdevStartReq(self.cur_data[4:])
         elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_VDEV_SET_PARAM_CMDID:
             self.tlv_msg = WmiTlvMsgVdevSetParam(self.cur_data[4:])
+        elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_PEER_SET_PARAM_CMDID:
+            self.tlv_msg = WmiTlvMsgPeerSetParam(self.cur_data[4:])
 
     def __match_id(self, msg_id_filter):
 

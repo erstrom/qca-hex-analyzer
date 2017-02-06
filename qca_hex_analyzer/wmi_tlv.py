@@ -43,6 +43,11 @@ PdevSetRegDomainMsg = namedtuple('PdevSetRegDomainMsg',
                                   'conform_limit_5ghz'],
                                  verbose=False)
 
+PeerSetParamMsg = namedtuple('PeerSetParamMsg',
+                             ['tlv_hdr', 'vdev_id', 'peer_macaddr',
+                              'param_id', 'param_value'],
+                             verbose=False)
+
 
 def _create_le32(data):
 
@@ -305,6 +310,42 @@ class WmiTlvMsgVdevSetParam(WmiTlvMsg):
         fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
                                            self.tlv_msg.tlv_hdr.tag.name))
         fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
+        fp.write("param_id: 0x%x (%s)\n" % (self.tlv_msg.param_id.value,
+                                            self.tlv_msg.param_id.name))
+        fp.write("param_value: 0x%x\n" % (self.tlv_msg.param_value))
+
+
+class WmiTlvMsgPeerSetParam(WmiTlvMsg):
+
+    def __init__(self, data):
+
+        tlv_hdr = _create_tlv_hdr(data)
+        if tlv_hdr.length < 20:
+            return None
+
+        vdev_id = _create_le32(data[4:])
+        peer_macaddr = data[8:16]
+        param_id = _create_le32(data[16:])
+        param_value = _create_le32(data[20:])
+
+        try:
+            param_id_enum = WmiTlvPeerParam(param_id)
+        except ValueError:
+            param_id_enum = WmiTlvPeerParam.WMI_PEER_PARAM_UNKNOWN
+
+        self.tlv_msg = PeerSetParamMsg(tlv_hdr=tlv_hdr,
+                                       vdev_id=vdev_id,
+                                       peer_macaddr=peer_macaddr,
+                                       param_id=param_id_enum,
+                                       param_value=param_value)
+
+    def print_data(self, fp):
+
+        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
+        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
+                                           self.tlv_msg.tlv_hdr.tag.name))
+        fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
+        fp.write("peer_macaddr: %s\n" % (self.tlv_msg.peer_macaddr))
         fp.write("param_id: 0x%x (%s)\n" % (self.tlv_msg.param_id.value,
                                             self.tlv_msg.param_id.name))
         fp.write("param_value: 0x%x\n" % (self.tlv_msg.param_value))
@@ -803,3 +844,16 @@ class WmiTlvVdevParam(Enum):
     WMI_TLV_VDEV_PARAM_IBSS_PS_WARMUP_TIME_SECS = 72
     WMI_TLV_VDEV_PARAM_IBSS_PS_1RX_CHAIN_IN_ATIM_WINDOW_ENABLE = 73
     WMI_TLV_VDEV_PARAM_UNKNOWN = 0xFFFF
+
+
+@unique
+class WmiTlvPeerParam(Enum):
+
+    WMI_PEER_SMPS_STATE = 0x1
+    WMI_PEER_AMPDU = 0x2
+    WMI_PEER_AUTHORIZE = 0x3
+    WMI_PEER_CHAN_WIDTH = 0x4
+    WMI_PEER_NSS = 0x5
+    WMI_PEER_USE_4ADDR = 0x6
+    WMI_PEER_DUMMY_VAR = 0xFF
+    WMI_PEER_PARAM_UNKNOWN = 0xFFFF
