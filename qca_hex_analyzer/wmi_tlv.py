@@ -203,9 +203,10 @@ class WmiTlvMsgVdevStartReq(WmiTlvMsg):
         disable_hw_ack = _create_le32(data[72:76])
 
         wmi_chan = None
-        tlv_hdr2 = _create_tlv_hdr(data[76:])
+        next_tlv_offset = tlv_hdr.length + 4
+        tlv_hdr2 = _create_tlv_hdr(data[next_tlv_offset:])
         if len(data) >= tlv_hdr.length + tlv_hdr2.length:
-            ch_data = data[80:]
+            ch_data = data[next_tlv_offset + 4:]
             mhz = _create_le32(ch_data[0:4])
             band_center_freq1 = _create_le32(ch_data[4:8])
             band_center_freq2 = _create_le32(ch_data[8:12])
