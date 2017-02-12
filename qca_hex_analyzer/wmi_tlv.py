@@ -88,6 +88,33 @@ def _create_tlv_hdr(data):
     return hdr
 
 
+def _isnamedtupleinstance(x):
+
+    t = type(x)
+    b = t.__bases__
+    if len(b) != 1 or b[0] != tuple:
+        return False
+    f = getattr(t, '_fields', None)
+    if not isinstance(f, tuple):
+        return False
+    return all(type(n) == str for n in f)
+
+
+def _print_named_tuple(ntup, fp, pre_string=""):
+
+    fp.write("%s%s:\n" % (pre_string, type(ntup).__name__))
+    for name, value in ntup._asdict().iteritems():
+        if _isnamedtupleinstance(value):
+            _print_named_tuple(value, fp, pre_string + "  ")
+        elif isinstance(value, Enum):
+            fp.write("%s  %s: 0x%x (%s)\n" %
+                     (pre_string, name, value.value, value.name))
+        elif isinstance(value, (int, long)):
+            fp.write("%s  %s: 0x%x\n" % (pre_string, name, value))
+        else:
+            fp.write("%s  %s: %s\n" % (pre_string, name, value))
+
+
 class WmiTlvMsg:
 
     @abstractmethod
@@ -118,12 +145,7 @@ class WmiTlvMsgPdevSetParam(WmiTlvMsg):
 
     def print_data(self, fp):
 
-        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
-        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
-                                           self.tlv_msg.tlv_hdr.tag.name))
-        fp.write("param: 0x%x (%s)\n" % (self.tlv_msg.param.value,
-                                         self.tlv_msg.param.name))
-        fp.write("value: 0x%x\n" % (self.tlv_msg.value))
+        _print_named_tuple(self.tlv_msg, fp)
 
 
 class WmiTlvMsgPdevSetRegDomain(WmiTlvMsg):
@@ -151,15 +173,7 @@ class WmiTlvMsgPdevSetRegDomain(WmiTlvMsg):
 
     def print_data(self, fp):
 
-        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
-        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
-                                           self.tlv_msg.tlv_hdr.tag.name))
-        fp.write("pdev_id: 0x%x\n" % (self.tlv_msg.pdev_id))
-        fp.write("regd: 0x%x\n" % (self.tlv_msg.regd))
-        fp.write("regd_2ghz: 0x%x\n" % (self.tlv_msg.regd_2ghz))
-        fp.write("regd_5ghz: 0x%x\n" % (self.tlv_msg.regd_5ghz))
-        fp.write("conform_limit_2ghz: 0x%x\n" % (self.tlv_msg.conform_limit_2ghz))
-        fp.write("conform_limit_5ghz: 0x%x\n" % (self.tlv_msg.conform_limit_5ghz))
+        _print_named_tuple(self.tlv_msg, fp)
 
 
 class WmiTlvMsgVdevCreate(WmiTlvMsg):
@@ -183,13 +197,7 @@ class WmiTlvMsgVdevCreate(WmiTlvMsg):
 
     def print_data(self, fp):
 
-        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
-        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
-                                           self.tlv_msg.tlv_hdr.tag.name))
-        fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
-        fp.write("vdev_type: 0x%x\n" % (self.tlv_msg.vdev_type))
-        fp.write("vdev_subtype: 0x%x\n" % (self.tlv_msg.vdev_subtype))
-        fp.write("mac_addr: %s\n" % (self.tlv_msg.mac_addr))
+        _print_named_tuple(self.tlv_msg, fp)
 
 
 class WmiTlvMsgVdevStartReq(WmiTlvMsg):
@@ -256,35 +264,7 @@ class WmiTlvMsgVdevStartReq(WmiTlvMsg):
 
     def print_data(self, fp):
 
-        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
-        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
-                                           self.tlv_msg.tlv_hdr.tag.name))
-        fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
-        fp.write("requestor_id: 0x%x\n" % (self.tlv_msg.requestor_id))
-        fp.write("bcn_intval: 0x%x\n" % (self.tlv_msg.bcn_intval))
-        fp.write("dtim_period: 0x%x\n" % (self.tlv_msg.dtim_period))
-        fp.write("flags: 0x%x\n" % (self.tlv_msg.flags))
-        fp.write("ssid_len: 0x%x\n" % (self.tlv_msg.ssid_len))
-        fp.write("ssid: %s\n" % (self.tlv_msg.ssid))
-        fp.write("bcn_tx_rate: 0x%x\n" % (self.tlv_msg.bcn_tx_rate))
-        fp.write("bcn_tx_power: 0x%x\n" % (self.tlv_msg.bcn_tx_power))
-        fp.write("num_noa_descr: 0x%x\n" % (self.tlv_msg.num_noa_descr))
-        fp.write("disable_hw_ack: 0x%x\n" % (self.tlv_msg.disable_hw_ack))
-        if self.tlv_msg.wmi_chan is not None:
-            fp.write("wmi chan:\n")
-            fp.write("  TLV length: %d\n" % (self.tlv_msg.wmi_chan.tlv_hdr.length))
-            fp.write("  TLV tag: 0x%x (%s)\n" % (self.tlv_msg.wmi_chan.tlv_hdr.tag.value,
-                                                 self.tlv_msg.wmi_chan.tlv_hdr.tag.name))
-            fp.write("  mhz: %d\n" % (self.tlv_msg.wmi_chan.mhz))
-            fp.write("  band_center_freq1: %d\n" % (self.tlv_msg.wmi_chan.band_center_freq1))
-            fp.write("  band_center_freq2: %d\n" % (self.tlv_msg.wmi_chan.band_center_freq2))
-            fp.write("  mode: %d\n" % (self.tlv_msg.wmi_chan.mode))
-            fp.write("  min_power: %d\n" % (self.tlv_msg.wmi_chan.min_power))
-            fp.write("  max_power: %d\n" % (self.tlv_msg.wmi_chan.max_power))
-            fp.write("  reg_power: %d\n" % (self.tlv_msg.wmi_chan.reg_power))
-            fp.write("  reg_classid: %d\n" % (self.tlv_msg.wmi_chan.reg_classid))
-            fp.write("  antenna_max: %d\n" % (self.tlv_msg.wmi_chan.antenna_max))
-            fp.write("  max_tx_power: %d\n" % (self.tlv_msg.wmi_chan.max_tx_power))
+        _print_named_tuple(self.tlv_msg, fp)
 
 
 class WmiTlvMsgVdevSetParam(WmiTlvMsg):
@@ -311,13 +291,7 @@ class WmiTlvMsgVdevSetParam(WmiTlvMsg):
 
     def print_data(self, fp):
 
-        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
-        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
-                                           self.tlv_msg.tlv_hdr.tag.name))
-        fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
-        fp.write("param_id: 0x%x (%s)\n" % (self.tlv_msg.param_id.value,
-                                            self.tlv_msg.param_id.name))
-        fp.write("param_value: 0x%x\n" % (self.tlv_msg.param_value))
+        _print_named_tuple(self.tlv_msg, fp)
 
 
 class WmiTlvMsgPeerCreate(WmiTlvMsg):
@@ -344,13 +318,7 @@ class WmiTlvMsgPeerCreate(WmiTlvMsg):
 
     def print_data(self, fp):
 
-        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
-        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
-                                           self.tlv_msg.tlv_hdr.tag.name))
-        fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
-        fp.write("peer_addr: %s\n" % (self.tlv_msg.peer_addr))
-        fp.write("peer_type: 0x%x (%s)\n" % (self.tlv_msg.peer_type.value,
-                                             self.tlv_msg.peer_type.name))
+        _print_named_tuple(self.tlv_msg, fp)
 
 
 class WmiTlvMsgPeerSetParam(WmiTlvMsg):
@@ -379,14 +347,7 @@ class WmiTlvMsgPeerSetParam(WmiTlvMsg):
 
     def print_data(self, fp):
 
-        fp.write("TLV length: %d\n" % (self.tlv_msg.tlv_hdr.length))
-        fp.write("TLV tag: 0x%x (%s)\n" % (self.tlv_msg.tlv_hdr.tag.value,
-                                           self.tlv_msg.tlv_hdr.tag.name))
-        fp.write("vdev_id: 0x%x\n" % (self.tlv_msg.vdev_id))
-        fp.write("peer_macaddr: %s\n" % (self.tlv_msg.peer_macaddr))
-        fp.write("param_id: 0x%x (%s)\n" % (self.tlv_msg.param_id.value,
-                                            self.tlv_msg.param_id.name))
-        fp.write("param_value: 0x%x\n" % (self.tlv_msg.param_value))
+        _print_named_tuple(self.tlv_msg, fp)
 
 
 @unique
