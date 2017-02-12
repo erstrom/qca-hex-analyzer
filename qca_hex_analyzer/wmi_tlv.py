@@ -7,6 +7,55 @@ TlvHeader = namedtuple('TlvHeader',
                        ['length', 'tag'],
                        verbose=False)
 
+WmiTlvAbiVersion = namedtuple('WmiTlvAbiVersion',
+                              ['abi_ver0', 'abi_ver1', 'abi_ver_ns0',
+                               'abi_ver_ns1', 'abi_ver_ns2', 'abi_ver_ns3'],
+                              verbose=False)
+
+WmiTlvInitCmd = namedtuple('WmiTlvInitCmd',
+                           ['tlv_hdr', 'abi', 'num_host_mem_chunks'],
+                           verbose=False)
+
+WmiTlvResourceConfig = namedtuple('WmiTlvResourceConfig',
+                                  ['tlv_hdr',
+                                   'num_vdevs',
+                                   'num_peers',
+                                   'num_offload_peers',
+                                   'num_offload_reorder_bufs',
+                                   'num_peer_keys',
+                                   'num_tids',
+                                   'ast_skid_limit',
+                                   'tx_chain_mask',
+                                   'rx_chain_mask',
+                                   'rx_timeout_pri',
+                                   'rx_decap_mode',
+                                   'scan_max_pending_reqs',
+                                   'bmiss_offload_max_vdev',
+                                   'roam_offload_max_vdev',
+                                   'roam_offload_max_ap_profiles',
+                                   'num_mcast_groups',
+                                   'num_mcast_table_elems',
+                                   'mcast2ucast_mode',
+                                   'tx_dbg_log_size',
+                                   'num_wds_entries',
+                                   'dma_burst_size',
+                                   'mac_aggr_delim',
+                                   'rx_skip_defrag_timeout_dup_detection_check',
+                                   'vow_config',
+                                   'gtk_offload_max_vdev',
+                                   'num_msdu_desc',
+                                   'max_frag_entries',
+                                   'num_tdls_vdevs',
+                                   'num_tdls_conn_table_entries',
+                                   'beacon_tx_offload_max_vdev',
+                                   'num_multicast_filter_entries',
+                                   'num_wow_filters',
+                                   'num_keep_alive_pattern',
+                                   'keep_alive_pattern_size',
+                                   'max_tdls_concurrent_sleep_sta',
+                                   'max_tdls_concurrent_buffer_sta'],
+                                  verbose=False)
+
 PdevSetParamMsg = namedtuple('PdevSetParamMsg',
                              ['tlv_hdr', 'param', 'value'],
                              verbose=False)
@@ -121,6 +170,123 @@ class WmiTlvMsg:
     def print_data(self, fp):
 
         pass
+
+
+class WmiTlvMsgInit(WmiTlvMsg):
+
+    def __init__(self, data):
+
+        tlv_hdr = _create_tlv_hdr(data)
+        if tlv_hdr.length < 12:
+            return None
+
+        abi_ver0 = _create_le32(data[4:8])
+        abi_ver1 = _create_le32(data[8:12])
+        abi_ver_ns0 = _create_le32(data[12:16])
+        abi_ver_ns1 = _create_le32(data[16:20])
+        abi_ver_ns2 = _create_le32(data[20:24])
+        abi_ver_ns3 = _create_le32(data[24:28])
+        num_host_mem_chunks = _create_le32(data[28:32])
+
+        tlv_abi_version = WmiTlvAbiVersion(abi_ver0=abi_ver0,
+                                           abi_ver1=abi_ver1,
+                                           abi_ver_ns0=abi_ver_ns0,
+                                           abi_ver_ns1=abi_ver_ns1,
+                                           abi_ver_ns2=abi_ver_ns2,
+                                           abi_ver_ns3=abi_ver_ns3)
+
+        self.tlv_init = WmiTlvInitCmd(tlv_hdr=tlv_hdr,
+                                      abi=tlv_abi_version,
+                                      num_host_mem_chunks=num_host_mem_chunks)
+
+        tlv_hdr = _create_tlv_hdr(data[32:])
+        if tlv_hdr.length < 12:
+            return None
+
+        cfg_data = data[36:]
+
+        num_vdevs = _create_le32(cfg_data[0:])
+        num_peers = _create_le32(cfg_data[4:])
+        num_offload_peers = _create_le32(cfg_data[8:])
+        num_offload_reorder_bufs = _create_le32(cfg_data[12:])
+        num_peer_keys = _create_le32(cfg_data[16:])
+        num_tids = _create_le32(cfg_data[20:])
+        ast_skid_limit = _create_le32(cfg_data[24:])
+        tx_chain_mask = _create_le32(cfg_data[28:])
+        rx_chain_mask = _create_le32(cfg_data[32:])
+        rx_timeout_pri = [_create_le32(cfg_data[36:]),
+                          _create_le32(cfg_data[40:]),
+                          _create_le32(cfg_data[44:]),
+                          _create_le32(cfg_data[48:])]
+        rx_decap_mode = _create_le32(cfg_data[52:])
+        scan_max_pending_reqs = _create_le32(cfg_data[52:])
+        bmiss_offload_max_vdev = _create_le32(cfg_data[56:])
+        roam_offload_max_vdev = _create_le32(cfg_data[60:])
+        roam_offload_max_ap_profiles = _create_le32(cfg_data[64:])
+        num_mcast_groups = _create_le32(cfg_data[68:])
+        num_mcast_table_elems = _create_le32(cfg_data[72:])
+        mcast2ucast_mode = _create_le32(cfg_data[76:])
+        tx_dbg_log_size = _create_le32(cfg_data[80:])
+        num_wds_entries = _create_le32(cfg_data[84:])
+        dma_burst_size = _create_le32(cfg_data[88:])
+        mac_aggr_delim = _create_le32(cfg_data[92:])
+        rx_skip_defrag_timeout_dup_detection_check = _create_le32(cfg_data[96:])
+        vow_config = _create_le32(cfg_data[100:])
+        gtk_offload_max_vdev = _create_le32(cfg_data[104:])
+        num_msdu_desc = _create_le32(cfg_data[108:])
+        max_frag_entries = _create_le32(cfg_data[112:])
+        num_tdls_vdevs = _create_le32(cfg_data[116:])
+        num_tdls_conn_table_entries = _create_le32(cfg_data[120:])
+        beacon_tx_offload_max_vdev = _create_le32(cfg_data[124:])
+        num_multicast_filter_entries = _create_le32(cfg_data[128:])
+        num_wow_filters = _create_le32(cfg_data[132:])
+        num_keep_alive_pattern = _create_le32(cfg_data[136:])
+        keep_alive_pattern_size = _create_le32(cfg_data[140:])
+        max_tdls_concurrent_sleep_sta = _create_le32(cfg_data[144:])
+        max_tdls_concurrent_buffer_sta = _create_le32(cfg_data[148:])
+
+        self.tlv_resource_cfg = WmiTlvResourceConfig(tlv_hdr=tlv_hdr,
+                                                     num_peers=num_peers,
+                                                     num_vdevs=num_vdevs,
+                                                     num_offload_peers=num_offload_peers,
+                                                     num_offload_reorder_bufs=num_offload_reorder_bufs,
+                                                     num_peer_keys=num_peer_keys,
+                                                     num_tids=num_tids,
+                                                     ast_skid_limit=ast_skid_limit,
+                                                     tx_chain_mask=tx_chain_mask,
+                                                     rx_chain_mask=rx_chain_mask,
+                                                     rx_timeout_pri=rx_timeout_pri,
+                                                     rx_decap_mode=rx_decap_mode,
+                                                     scan_max_pending_reqs=scan_max_pending_reqs,
+                                                     bmiss_offload_max_vdev=bmiss_offload_max_vdev,
+                                                     roam_offload_max_vdev=roam_offload_max_vdev,
+                                                     roam_offload_max_ap_profiles=roam_offload_max_ap_profiles,
+                                                     num_mcast_groups=num_mcast_groups,
+                                                     num_mcast_table_elems=num_mcast_table_elems,
+                                                     mcast2ucast_mode=mcast2ucast_mode,
+                                                     tx_dbg_log_size=tx_dbg_log_size,
+                                                     num_wds_entries=num_wds_entries,
+                                                     dma_burst_size=dma_burst_size,
+                                                     mac_aggr_delim=mac_aggr_delim,
+                                                     rx_skip_defrag_timeout_dup_detection_check=rx_skip_defrag_timeout_dup_detection_check,
+                                                     vow_config=vow_config,
+                                                     gtk_offload_max_vdev=gtk_offload_max_vdev,
+                                                     num_msdu_desc=num_msdu_desc,
+                                                     max_frag_entries=max_frag_entries,
+                                                     num_tdls_vdevs=num_tdls_vdevs,
+                                                     num_tdls_conn_table_entries=num_tdls_conn_table_entries,
+                                                     beacon_tx_offload_max_vdev=beacon_tx_offload_max_vdev,
+                                                     num_multicast_filter_entries=num_multicast_filter_entries,
+                                                     num_wow_filters=num_wow_filters,
+                                                     num_keep_alive_pattern=num_keep_alive_pattern,
+                                                     keep_alive_pattern_size=keep_alive_pattern_size,
+                                                     max_tdls_concurrent_sleep_sta=max_tdls_concurrent_sleep_sta,
+                                                     max_tdls_concurrent_buffer_sta=max_tdls_concurrent_buffer_sta)
+
+    def print_data(self, fp):
+
+        _print_named_tuple(self.tlv_init, fp)
+        _print_named_tuple(self.tlv_resource_cfg, fp)
 
 
 class WmiTlvMsgPdevSetParam(WmiTlvMsg):

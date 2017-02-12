@@ -3,7 +3,7 @@ from .wmi_unified import WmiUnified, WmiUnifiedCmd, WmiUnifiedCmdGrpId
 from .wmi_tlv import WmiTlvMsg, WmiTlvMsgPdevSetParam, WmiTlvMsgVdevCreate, \
                      WmiTlvMsgVdevSetParam, WmiTlvMsgVdevStartReq, \
                      WmiTlvMsgPdevSetRegDomain, WmiTlvMsgPeerSetParam, \
-                     WmiTlvMsgPeerCreate
+                     WmiTlvMsgPeerCreate, WmiTlvMsgInit
 from .analyzer import Analyzer, HtcHeader
 
 
@@ -106,6 +106,8 @@ class WmiCtrlAnalyzer(Analyzer):
 
     def __parse_tlv_data(self):
 
+        if self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_INIT_CMDID:
+            self.tlv_msg = WmiTlvMsgInit(self.cur_data[4:])
         if self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_PDEV_SET_PARAM_CMDID:
             self.tlv_msg = WmiTlvMsgPdevSetParam(self.cur_data[4:])
         elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_PDEV_SET_REGDOMAIN_CMDID:

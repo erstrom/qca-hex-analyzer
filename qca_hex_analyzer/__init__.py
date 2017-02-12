@@ -9,6 +9,7 @@ from .wmi_unified import WmiUnifiedCmd
 from .wmi_unified import WmiUnifiedEvt
 from .wmi_unified import WmiUnifiedCmdGrpId
 from .wmi_tlv import WmiTlvMsg
+from .wmi_tlv import WmiTlvMsgInit
 from .wmi_tlv import WmiTlvMsgPdevSetParam
 from .wmi_tlv import WmiTlvMsgPdevSetRegDomain
 from .wmi_tlv import WmiTlvMsgVdevCreate
