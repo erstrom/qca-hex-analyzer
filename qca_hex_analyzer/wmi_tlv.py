@@ -102,6 +102,11 @@ PeerSetParamMsg = namedtuple('PeerSetParamMsg',
                               'param_id', 'param_value'],
                              verbose=False)
 
+StaPowerSaveParamMsg = namedtuple('StaPowerSaveParamMsg',
+                                  ['tlv_hdr', 'vdev_id', 'param_id',
+                                   'param_value'],
+                                  verbose=False)
+
 
 def _create_le32(data):
 
@@ -510,6 +515,33 @@ class WmiTlvMsgPeerSetParam(WmiTlvMsg):
                                        peer_macaddr=peer_macaddr,
                                        param_id=param_id_enum,
                                        param_value=param_value)
+
+    def print_data(self, fp):
+
+        _print_named_tuple(self.tlv_msg, fp)
+
+
+class WmiTlvStaPowerSaveParam(WmiTlvMsg):
+
+    def __init__(self, data):
+
+        tlv_hdr = _create_tlv_hdr(data)
+        if tlv_hdr.length < 12:
+            return None
+
+        vdev_id = _create_le32(data[4:])
+        param_id = _create_le32(data[8:])
+        param_value = _create_le32(data[12:])
+
+        try:
+            param_id_enum = WmiStaPowerSaveParam(param_id)
+        except ValueError:
+            param_id_enum = WmiStaPowerSaveParam.WMI_STA_PS_PARAM_UNKNOWN
+
+        self.tlv_msg = StaPowerSaveParamMsg(tlv_hdr=tlv_hdr,
+                                            vdev_id=vdev_id,
+                                            param_id=param_id_enum,
+                                            param_value=param_value)
 
     def print_data(self, fp):
 
@@ -1032,3 +1064,14 @@ class WmiTlvPeerType(Enum):
     WMI_TLV_PEER_TYPE_TDLS = 2
     WMI_TLV_PEER_TYPE_HOST_MAX = 127
     WMI_TLV_PEER_TYPE_ROAMOFFLOAD_TMP = 128
+
+
+@unique
+class WmiStaPowerSaveParam(Enum):
+
+    WMI_STA_PS_PARAM_RX_WAKE_POLICY = 0
+    WMI_STA_PS_PARAM_TX_WAKE_THRESHOLD = 1
+    WMI_STA_PS_PARAM_PSPOLL_COUNT = 2
+    WMI_STA_PS_PARAM_INACTIVITY_TIME = 3
+    WMI_STA_PS_PARAM_UAPSD = 4
+    WMI_STA_PS_PARAM_UNKNOWN = 0xFFFF

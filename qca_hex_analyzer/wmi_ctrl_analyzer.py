@@ -3,7 +3,8 @@ from .wmi_unified import WmiUnified, WmiUnifiedCmd, WmiUnifiedCmdGrpId
 from .wmi_tlv import WmiTlvMsg, WmiTlvMsgPdevSetParam, WmiTlvMsgVdevCreate, \
                      WmiTlvMsgVdevSetParam, WmiTlvMsgVdevStartReq, \
                      WmiTlvMsgPdevSetRegDomain, WmiTlvMsgPeerSetParam, \
-                     WmiTlvMsgPeerCreate, WmiTlvMsgInit
+                     WmiTlvMsgPeerCreate, WmiTlvMsgInit, \
+                     WmiTlvStaPowerSaveParam
 from .analyzer import Analyzer, HtcHeader
 
 
@@ -122,6 +123,8 @@ class WmiCtrlAnalyzer(Analyzer):
             self.tlv_msg = WmiTlvMsgPeerCreate(self.cur_data[4:])
         elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_PEER_SET_PARAM_CMDID:
             self.tlv_msg = WmiTlvMsgPeerSetParam(self.cur_data[4:])
+        elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_STA_POWERSAVE_PARAM_CMDID:
+            self.tlv_msg = WmiTlvStaPowerSaveParam(self.cur_data[4:])
 
     def __match_id(self, msg_id_filter):
 
