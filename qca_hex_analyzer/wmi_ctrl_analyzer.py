@@ -107,23 +107,23 @@ class WmiCtrlAnalyzer(Analyzer):
 
     def __parse_tlv_data(self):
 
-        if self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_INIT_CMDID:
+        if self.wmi_enum == WmiUnifiedCmd.WMI_INIT_CMDID:
             self.tlv_msg = WmiTlvMsgInit(self.cur_data[4:])
-        if self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_PDEV_SET_PARAM_CMDID:
+        if self.wmi_enum == WmiUnifiedCmd.WMI_PDEV_SET_PARAM_CMDID:
             self.tlv_msg = WmiTlvMsgPdevSetParam(self.cur_data[4:])
-        elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_PDEV_SET_REGDOMAIN_CMDID:
+        elif self.wmi_enum == WmiUnifiedCmd.WMI_PDEV_SET_REGDOMAIN_CMDID:
             self.tlv_msg = WmiTlvMsgPdevSetRegDomain(self.cur_data[4:])
-        elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_VDEV_CREATE_CMDID:
+        elif self.wmi_enum == WmiUnifiedCmd.WMI_VDEV_CREATE_CMDID:
             self.tlv_msg = WmiTlvMsgVdevCreate(self.cur_data[4:])
-        elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_VDEV_START_REQUEST_CMDID:
+        elif self.wmi_enum == WmiUnifiedCmd.WMI_VDEV_START_REQUEST_CMDID:
             self.tlv_msg = WmiTlvMsgVdevStartReq(self.cur_data[4:])
-        elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_VDEV_SET_PARAM_CMDID:
+        elif self.wmi_enum == WmiUnifiedCmd.WMI_VDEV_SET_PARAM_CMDID:
             self.tlv_msg = WmiTlvMsgVdevSetParam(self.cur_data[4:])
-        elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_PEER_CREATE_CMDID:
+        elif self.wmi_enum == WmiUnifiedCmd.WMI_PEER_CREATE_CMDID:
             self.tlv_msg = WmiTlvMsgPeerCreate(self.cur_data[4:])
-        elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_PEER_SET_PARAM_CMDID:
+        elif self.wmi_enum == WmiUnifiedCmd.WMI_PEER_SET_PARAM_CMDID:
             self.tlv_msg = WmiTlvMsgPeerSetParam(self.cur_data[4:])
-        elif self.wmi_enum == WmiUnifiedCmd.WMI_UNIFIED_STA_POWERSAVE_PARAM_CMDID:
+        elif self.wmi_enum == WmiUnifiedCmd.WMI_STA_POWERSAVE_PARAM_CMDID:
             self.tlv_msg = WmiTlvStaPowerSaveParam(self.cur_data[4:])
 
     def __match_id(self, msg_id_filter):
